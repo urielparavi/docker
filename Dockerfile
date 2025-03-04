@@ -1,0 +1,32 @@
+# FROM - Allow us to build our image up on another base image. sidenote: we could build a Docker image from scratch,
+# but we always want some kind of operating system layer in there, some kind of other tool which our code needs
+FROM node
+
+# WORKDIR: Working directory that tells Docker that all the comands will be executed from inside that folder, so app folder 
+# (in our case)
+WORKDIR /app
+
+# COPY - We tell Docker which files that live here on our local machine, should go into the image, and we specify two path here
+
+# First path: path of the outside container/image where the files leave that should be copied into the image, and a dot 
+# means that is the same folder that contain the Dockerfile. So, it tell Docker that all 
+# folders, sub folders, files should be copie into the image
+
+# Second path: the path inside of the image where those files should be stored. In our case, it's the sub folder app
+# where all our folders/subfolders, files where the Dockerfile, so all of them will copied to /app. And if this folder not
+# exist it will be created
+COPY . /app
+
+# RUN - We telling Docker after copying, to run npm install on our image for all the dependencies 
+RUN npm install
+
+# We expose the port from our isolated conatiner to our local machine
+EXPOSE 80
+
+# So our node server will run when a container is started based on the image, and not the imaged itself.
+# The difference between RUN and CMD, that RUN will setting up our image, but CMD will activate it on the container based
+# from our image
+CMD [ "node", "server.js" ]
+
+
+
