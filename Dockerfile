@@ -20,13 +20,17 @@ COPY . /app
 # RUN - We telling Docker after copying, to run npm install on our image for all the dependencies 
 RUN npm install
 
-# We expose the port from our isolated conatiner to our local machine
+# We expose the port from our isolated conatiner to our local machine, but actually this more instruction for 
+# documentation purposes, so we don't need this for run our container
 EXPOSE 80
 
 # So our node server will run when a container is started based on the image, and not the imaged itself.
 # The difference between RUN and CMD, that RUN will setting up our image, but CMD will activate it on the container based
 # from our image
 CMD [ "node", "server.js" ]
+
+# docker build . => With the dot we tell Docker that the Dockerfile will be in the same folder as we're running this command
+
 
 
 
