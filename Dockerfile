@@ -6,6 +6,14 @@ FROM node
 # (in our case)
 WORKDIR /app
 
+# Since all layers changes after the changing layer, we add the package.json here, so when we'll change our source code
+# (when we copy after npm install) only the subsequent instructions we'll re-execute, and then the docker we'll not run
+# npm install when the source code change, since there is no need, because our dependencies not changed
+COPY package.json /app
+
+# RUN - We telling Docker after copying, to run npm install on our image for all the dependencies 
+RUN npm install
+
 # COPY - We tell Docker which files that live here on our local machine, should go into the image, and we specify two path here
 
 # First path: path of the outside container/image where the files leave that should be copied into the image, and a dot 
@@ -16,9 +24,6 @@ WORKDIR /app
 # where all our folders/subfolders, files where the Dockerfile, so all of them will copied to /app. And if this folder not
 # exist it will be created
 COPY . /app
-
-# RUN - We telling Docker after copying, to run npm install on our image for all the dependencies 
-RUN npm install
 
 # We expose the port from our isolated conatiner to our local machine, but actually this more instruction for 
 # documentation purposes, so we don't need this for run our container
