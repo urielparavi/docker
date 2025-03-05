@@ -34,8 +34,21 @@ EXPOSE 80
 # from our image
 CMD [ "node", "server.js" ]
 
+
+# COMMANDS
+
 # docker build . => With the dot we tell Docker that the Dockerfile will be in the same folder as we're running this command
 
+# DELETE IMAGES & CONTAINERS - *Sidenote* We can only remove images if we remove their containers first
 
+# docker container prune - Allow us to delete all our stoped containers
+# docker rm - Allow us to delete specific or multiple containers with their names
+
+# docker images - Allow to see all our images
+
+# docker image prune - Allow us to remove all our images 
+# docker rmi - Allow us to remove specific or multiple images with their names
+
+# docker system prune -a => Allow us to clean up unused images, so it's clear everything from the docker system 
 
 
