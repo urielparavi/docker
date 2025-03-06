@@ -6,7 +6,8 @@ COPY . /app
 
 CMD [ "python", "rng.py" ]
 
-# Iמ this example we illustrate a case where we only want to run software/app and not run it as a web server - so, we want 
+# ENTERING INTERACTIVE MODE 
+# In this example we illustrate a case where we only want to run software/app and not run it as a web server - so, we want 
 #  to be in attached state, but in listening mode and also to be able input something, so interact with our container
 
 # - i - t / -it => With the combining of the i and the t flags we'll able to be in listening mode, and also to input something 
