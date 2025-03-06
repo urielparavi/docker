@@ -1,6 +1,6 @@
 # FROM - Allow us to build our image up on another base image. sidenote: we could build a Docker image from scratch,
 # but we always want some kind of operating system layer in there, some kind of other tool which our code needs
-FROM node
+FROM node:12
 
 # WORKDIR: Working directory that tells Docker that all the comands will be executed from inside that folder, so app folder 
 # (in our case)
@@ -47,7 +47,7 @@ CMD [ "node", "server.js" ]
 
 # docker images - Allow to see all our images
 
-# docker image prune - Allow us to remove all our images 
+# docker image prune -a - Allow us to remove all our images 
 # docker rmi - Allow us to remove specific or multiple images with their names
 
 # docker system prune -a => Allow us to clean up unused images, so it's clear everything from the docker system 
@@ -70,3 +70,19 @@ CMD [ "node", "server.js" ]
 # Here we copy from the test folder in our container only the test.txt file to the dummy folder in our local host machine 
 # docker cp youthful_archimedes:/test/test.txt dummy
 
+
+# NAMING & TAGGING CONTAINERS AND IMAGES
+
+# Here we give a name for container
+# docker run -p 3000:80 -d --rm --name goalsapp 74da73ce6927 (for more details check docker run --help)
+
+# In image, the image tags(name & tag combination) consists of two parts - the actual name (repository), and the tag. 
+# so, name:tag
+# So with the name we set general name, and with the tag we define a more specialized version of that image 
+# For example: node:12
+
+# We build our image and give it name of goals, and tag latest, to indicate that this is latest version of the goalsapp
+# docker build -t goals:latest . (for more details check docker build --help) 
+
+# We run and give the container name 'goalsapp' and plug in the image with the tag 'goals:latest' instead the image ID
+# docker run -p 3000:80 -d --rm --name goalsapp goals:latest
