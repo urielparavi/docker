@@ -51,8 +51,12 @@ CMD [ "node", "server.js" ]
 
 # docker system prune -a => Allow us to clean up unused images, so it's clear everything from the docker system 
 
-
 # --rm - Create container and remove it automatically when it stop (more details on docker run --help)
 # example: docker run -p 3000:80 -d --rm 05c377af849a
+
+# docker image inspect 05c377af849a - Give us information about the image
+
+
+
 
 
