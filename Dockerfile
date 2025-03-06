@@ -39,6 +39,7 @@ CMD [ "node", "server.js" ]
 
 # docker build . => With the dot we tell Docker that the Dockerfile will be in the same folder as we're running this command
 
+
 # DELETE IMAGES & CONTAINERS - *Sidenote* We can only remove images if we remove their containers first
 
 # docker container prune - Allow us to delete all our stoped containers
@@ -57,6 +58,15 @@ CMD [ "node", "server.js" ]
 # docker image inspect 05c377af849a - Give us information about the image
 
 
+# CP COMMAND - allow us to copy files of folders into running container or out of a running container to our local host machine
 
+# Here we copy everything in the dummy folder from our local host machine to this container to test folder (if it not 
+# exist, it will created)
+# docker cp dummy/. youthful_archimedes:/test
 
+# Here we copy from the test folder in our container to the dummy folder in our local host machine 
+# docker cp youthful_archimedes:/test dummy
+
+# Here we copy from the test folder in our container only the test.txt file to the dummy folder in our local host machine 
+# docker cp youthful_archimedes:/test/test.txt dummy
 
