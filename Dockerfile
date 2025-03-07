@@ -113,3 +113,25 @@ CMD [ "python", "rng.py" ]
 
 # We run and give the container name 'goalsapp' and plug in the image with the tag 'goals:latest' instead the image ID
 # docker run -p 3000:80 -d --rm --name goalsapp goals:latest
+
+# PUSHING IMAGES TO DOCKERHUB 
+
+# *Sidenote* - if we push/pull to a private registry (other provider), we need to inlude the host, so the url of the provider
+# for example - HOST:NAME
+
+# We need to verify that this is our account for pushing images to dockerhub. 
+# login
+
+# For pushing image to dockerhub we need to create reopository and give our image the name that we set in dockerhub
+# for example: urielpa/node-hello-world:tagname
+
+# First way - create new image with that name
+# docker build -t urielpa/node-hello-world .
+
+# Second way - we reuse that image that we have already and renaming it for retaggin images
+# *Sidenote* when we renaming an image, we create a clone of the old image, so the old image not deleted
+
+# docker tag node-demo:latest urielpa/node-hello-world(:latest)
+# node-demo:latest - old name, urielpa/node-hello-world - new name (we can also allocate it a tag)
+
+# docker push urielpa/node-hello-world(:tagname)
