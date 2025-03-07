@@ -109,6 +109,7 @@ CMD [ "python", "rng.py" ]
 # For example: node:12
 
 # We build our image and give it name of goals, and tag latest, to indicate that this is latest version of the goalsapp
+# The -t flag allows us to assign a name to the image, which makes it easier to refer to when running
 # docker build -t goals:latest . (for more details check docker build --help) 
 
 # We run and give the container name 'goalsapp' and plug in the image with the tag 'goals:latest' instead the image ID
@@ -120,7 +121,7 @@ CMD [ "python", "rng.py" ]
 # for example - HOST:NAME
 
 # We need to verify that this is our account for pushing images to dockerhub. 
-# login
+# login (we can also logout after)
 
 # For pushing image to dockerhub we need to create reopository and give our image the name that we set in dockerhub
 # for example: urielpa/node-hello-world:tagname
@@ -135,3 +136,17 @@ CMD [ "python", "rng.py" ]
 # node-demo:latest - old name, urielpa/node-hello-world - new name (we can also allocate it a tag)
 
 # docker push urielpa/node-hello-world(:tagname)
+
+
+# PULLING & USING SHARED IMAGES THROUGH DOCKERHUB
+
+# *Sidenote* when we pull, we always pull the latest image of that name from your container registry.
+# So if in the meantime we rebuild the image, and push an updated imaged to the registry,
+# the next time we'll execute docker pull, we'll fetch that latest image,
+# but if we have an image locally because we pulled or run it before, if we'll run a container again based on an image,
+# docker run will not check if the image that we have locally on our system is the latest version of that image.
+# So if the meantime we update the image and pushed it again to dockerhub and we using 'run docker' there after,
+# we'll not get the latest updated image. So we need to manually 'run ducker pull' and then the image name first
+# to ensure that we have the latest image version, and then execute 'docker run again'
+
+# docker pull urielpa/node-hello-world   
