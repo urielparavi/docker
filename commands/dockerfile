@@ -29,13 +29,17 @@ COPY . /app
 # documentation purposes, so we don't need this for run our container
 EXPOSE 80
 
+# The path inside the container which should be mapped to some folder outside of the container and where data
+# should survive if we'll delete the container
+VOLUME [ "/app/feedback" ]
+
 # So our node server will run when a container is started based on the image, and not the imaged itself.
 # The difference between RUN and CMD, that RUN will setting up our image, but CMD will activate it on the container based
 # from our image
 CMD [ "node", "server.js" ]
 
 
-# EXAMPLES OF CREATEING IMAGES & CONTAINERS
+# EXAMPLES OF CREATEING IMAGES & CONTAINERS (WITH VOLUMES)
 
 # We create image with the name feedback-node
 # docker build -t feedback-node .
@@ -44,15 +48,22 @@ CMD [ "node", "server.js" ]
 # feedback-node image, and after that it will be rmoved
 # docker run -p 3000:80 -d --name feedback-app --rm feedback-node
 
+# docker run -d -p 3000:80 --rm --name feedback-app feedback-node:volumes
+
 
 # COMMANDS
 
 # docker build . => With the dot we tell Docker that the Dockerfile will be in the same folder as we're running this command
 
-# -d : Run the container in detached mode - i.e. output printed by the container is not
-# visible, the command prompt / terminal does NOT wait for the container to stop
+# -d : Run the container in detached mode - i.e. output printed by the container is not visible,
+# the command prompt / terminal does NOT wait for the container to stop
 
 # The -t flag allows us to assign a name to the image, which makes it easier to refer to when running
+
+# CHECKING ERROR/S
+
+# We looking in the output of the container to see what went wrong
+# docker logs feedback-app (feedback-app -containers name)
 
 
 # DELETE IMAGES & CONTAINERS - *Sidenote* We can only remove images if we remove their containers first
