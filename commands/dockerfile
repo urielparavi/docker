@@ -29,26 +29,16 @@ COPY . /app
 # documentation purposes, so we don't need this for run our container
 EXPOSE 80
 
+# Anonymous Volume
 # The path inside the container which should be mapped to some folder outside of the container and where data
-# should survive if we'll delete the container
+# should survive if we'll delete the container. In this case it will not survive if the container will delete,
+# because it's anonymous volume (as long as we created the container with --rm command)
 VOLUME [ "/app/feedback" ]
 
 # So our node server will run when a container is started based on the image, and not the imaged itself.
 # The difference between RUN and CMD, that RUN will setting up our image, but CMD will activate it on the container based
 # from our image
 CMD [ "node", "server.js" ]
-
-
-# EXAMPLES OF CREATEING IMAGES & CONTAINERS (WITH VOLUMES)
-
-# We create image with the name feedback-node
-# docker build -t feedback-node .
-
-# We run container on port 3000 on our local machine in detached mode with containr's name feedback-app based
-# feedback-node image, and after that it will be rmoved
-# docker run -p 3000:80 -d --name feedback-app --rm feedback-node
-
-# docker run -d -p 3000:80 --rm --name feedback-app feedback-node:volumes
 
 
 # COMMANDS
@@ -167,3 +157,52 @@ CMD [ "node", "server.js" ]
 # to ensure that we have the latest image version, and then execute 'docker run again'
 
 # docker pull urielpa/node-hello-world   
+
+# EXAMPLES OF CREATEING IMAGES & CONTAINERS (WITH VOLUMES)
+
+# We create image with the name feedback-node
+# docker build -t feedback-node .
+
+# We run container on port 3000 on our local machine in detached mode with containr's name feedback-app based
+# feedback-node image, and after that it will be rmoved
+# docker run -p 3000:80 -d --name feedback-app --rm feedback-node
+
+# docker run -d -p 3000:80 --rm --name feedback-app feedback-node:volumes
+
+
+# VOLUMES COMMANDS
+
+# docker volumes ls - give us the list of the volumes   
+
+
+# Volumes - folders on our host machine in the hard drive, which available into the containers, so the data in our 
+# machine it exactly like our data in the folder in the container that we defined. So if the data changes in one place, 
+# it will change in both, and so the information will persist even if the container will deleted, because it will stay 
+# on our machine
+
+# ANONYMOUS VOLUMES VS NAMED VOLUMES
+
+# Anonymous Volume - anonymous volume it attached to specific container. So, if the container will delete, 
+# the volume will not survive, and it will erase
+# example of anonymous volume: VOLUME [ "/app/feedback" ]
+
+# Named volume - volume that can persist from container to a new container even if his previous container deleted
+
+
+# CREATING ANONYMOUS VOLUMES & NAMED VOLUMES & DLEETING THEM
+
+# *Sidenote* if we're not adding --rm when we creating our container with anonymous volume, we'll need to delete the  
+# volume and also the container, but if we adding the --rm, it will erase both with the container
+
+# Example to create image with a name and volume as a tag
+# docker build -t feedback-node:volumes .
+
+# *Sidenote* important that when we creating new container and want to connect to volume, that it will be the same name
+# of the volume that we named and created
+
+# Example to create container based imaged with named volume
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback feedback-node:volumes
+
+# Delete specific volume - docker volume rm feedback (feedback - volume name)/e329b312edf7c0e4ddf6bb6a1(volume id)
+
+# Delete all volumes - docker volume prune 
