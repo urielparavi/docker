@@ -262,7 +262,7 @@ CMD [ "npm", "start" ]
 
 # ADJUSTMENT FOR NODEMON TO NODEJS
 
-# We needed to add -L in the scripts for nodemon for nodemon work in windows
+# We needed to add -L in the scripts for nodemon work in windows because we using WSL 2
 # For more details check in: https://github.com/remy/nodemon#application-isnt-restarting
 
 # "scripts": {
