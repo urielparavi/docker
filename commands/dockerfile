@@ -206,3 +206,37 @@ CMD [ "node", "server.js" ]
 # Delete specific volume - docker volume rm feedback (feedback - volume name)/e329b312edf7c0e4ddf6bb6a1(volume id)
 
 # Delete all volumes - docker volume prune 
+
+
+# BIND MOUNTS
+
+# Bind Mounts - It's similar to volume, but the difference that we managed the path and the folder of our app in our 
+# local machine, and not Docker like with volume that we don't know where it locate. Also the code will not copied from  
+# COPY . . snapshot, but instead from the bind mount, so that folder of our app that we specify for that, and his big 
+# advantage it's that we can persist editable data with him - so code that we changing in live within the container will 
+# save without creating new image or new container, because whenever that the code inside the folder of our app that we 
+# specified will change, it will reflected from it
+
+
+# We setting/creating a Bind Mount
+
+# First way:
+
+# "%cd%" => The absolute path to the folder in our local machine where we are, and where we have all the source code
+#  in our case. and this code would go to the mapped folder, in our case this is the app folder (the working direcotry) 
+# in the container
+
+# "%cd%":/app => Our root/working direcotry in the container where we have all the source code, so the mapped folder,
+# the app folder that we specified as a working directory, because we wanna control the entire app folder, so our code 
+# will change and reflected on our local machine in a live way. So basically we copy our main folder to the main folder 
+# (app) in the container and so if we change code on the local machine, it will also change in the container and so any 
+# change made on the local machine will automatically be visible in the container as well.
+
+# Second way:
+
+# ${PWD} => equal to "%cd%"
+# ${PWD}:/app  => equal to "%cd%":/app 
+
+# Work only from the powershell 
+# docker run -d -p 3000:80 (--rm) --name f-app -v feedback:/app/feedback -v ${PWD}:/app feedback-node:volumes
+# docker run -d -p 3000:80 --name feedback-app -v feedback:/app/feedback -v "%cd%":/app feedback-node:volumes
