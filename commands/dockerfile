@@ -35,6 +35,8 @@ EXPOSE 80
 # because it's anonymous volume (as long as we created the container with --rm command)
 VOLUME [ "/app/feedback" ]
 
+# VOLUME [ "/app/node_modules" ]
+
 # So our node server will run when a container is started based on the image, and not the imaged itself.
 # The difference between RUN and CMD, that RUN will setting up our image, but CMD will activate it on the container based
 # from our image
@@ -240,3 +242,17 @@ CMD [ "node", "server.js" ]
 # Work only from the powershell 
 # docker run -d -p 3000:80 (--rm) --name f-app -v feedback:/app/feedback -v ${PWD}:/app feedback-node:volumes
 # docker run -d -p 3000:80 --name feedback-app -v feedback:/app/feedback -v "%cd%":/app feedback-node:volumes
+
+
+# COMBINING & MERGING DIFFERENT VOLUMES - Creating named volume & bind mount & anonymous volume
+
+
+# -v /app/node_modules - anonymous volume because it has no name, and we can create it also like this: 
+# VOLUME [ "/app/node_modules" ], but we'll need to create an new image, so we're not using this way.
+# So, essentially we overwrite our bind mount where we're copied our source code from our local machine 
+# to the root/working directory (app) in the container without the dependencies (because that we have no 
+# dependencies in our local machine) with anonymous volume with longer internal/specific path, with the 
+# source code from the container, so we overwrite it with the return first snapshot where we had the node  
+# modules in the container, when we created the image
+
+# docker run -d -p 3000:80 --name feedback-app -v feedback:/app/feedback -v "%cd%":/app -v /app/node_modules  feedback-node:volumes
