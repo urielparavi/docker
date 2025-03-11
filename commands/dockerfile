@@ -268,3 +268,30 @@ CMD [ "npm", "start" ]
 # "scripts": {
 #     "start": "nodemon -L server.js"
 #   },
+
+
+# ADDING READ ONLY VOLUMES & OVERWRITING AGAIN WITH ANONYMOUS VOLUME
+
+# The idea here, is that we want to restrict our container to read only, but still keep the permission to write
+# in to feedback and temp folders, because data will go/change there, since all other changes will come from our
+# host machine to the container through the bind mount
+
+# -v "%cd%":/app:ro => ro (read only) - This ensures that from the container docker only will get read permission 
+# and not write.
+
+# -v /app/temp => We specify another anonymous volume that more specific and longer from "%cd%":/app,
+# folder because we wanna overrides the main bind mount volume ("%cd%":/app), and give permission to write in to 
+# the temp folder from the container, since data changing there. So we stick to one that created during the image 
+# building, so the temp folder that already exist in the container. Also because it's anonymous volume, all the 
+# data will erase, but we good with that, since the temp folder was originally intended for temporary files.
+
+# -v feedback:/app/feedback => In the line below we explain about this volume, but we did not added it here,
+# it already exists. We only explain why we didn't need to do anything for give write permission to write in to 
+# the feedback folder.
+# In the case of feedback folder we're already good, since we have already specific and longer volume that overrides
+# our main bind mount volume ("%cd%":/app), the named volume that already exist -v feedback:/app/feedback.
+# So because it more longer it will overrides our bind mount. So we don't need to adding nothing, we're good
+
+# In short, we create container with read only permission, except from to write in to the feedback and the temp 
+# folders, because we do need to get write permissions when we write in to these folders.
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:volumes  
