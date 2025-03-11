@@ -213,8 +213,9 @@ CMD [ "npm", "start" ]
 
 
 # BIND MOUNTS
+# *Sidenote* - Bind Mount is not 
 
-# Bind Mounts - It's similar to volume, but the difference that we managed the path and the folder of our app in our 
+# Bind Mounts - It's similar to volume, but the difference that we're managed the path and the folder of our app in our 
 # local machine, and not Docker like with volume that we don't know where it locate. Also the code will not copied from  
 # COPY . . snapshot, but instead from the bind mount, so that folder of our app that we specify for that, and his big 
 # advantage it's that we can persist editable data with him - so code that we changing in live within the container will 
@@ -294,4 +295,36 @@ CMD [ "npm", "start" ]
 
 # In short, we create container with read only permission, except from to write in to the feedback and the temp 
 # folders, because we do need to get write permissions when we write in to these folders.
-# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:volumes  
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/
+# node_modules feedback-node:volumes  
+
+
+
+# GENERAL INFORMATION & COMMANDS ON VOLUMES & Managing Docker Volumes
+
+# docker volume --help
+
+# docker volume ls - Lists of all the currently active volumes
+
+# So here we have 3 volumes: -v feedback:/app/feedback, -v /app/temp, -v /app/node_modules, the bind mount is not count, 
+# because is not managed by Docker, but we.
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/
+# node_modules feedback-node:volumes 
+
+# Example to create a volume independently without also create container. So if we want, we can create a container
+# and then connect to a named volume that exist, so as we used until now, but also to create a new one when we 
+# create a container 
+# docker volume create feedback-files
+
+# docker volume inspect feedback - Give us some informatin about the volume
+
+# We need to remember that if we delete a named volume, all his data also delete. So in our case, if we'll delete the
+# feedback volume, all our records in the feedback folder will delete, and when we'll create new container, it will
+# no longer exist
+# docker volume rm feedback - delete this volume or what that we will specify here
+
+# docker volume prune - delete all the volumes that we have
+
+
+
+
