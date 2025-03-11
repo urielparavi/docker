@@ -299,7 +299,6 @@ CMD [ "npm", "start" ]
 # node_modules feedback-node:volumes  
 
 
-
 # GENERAL INFORMATION & COMMANDS ON VOLUMES & Managing Docker Volumes
 
 # docker volume --help
@@ -326,5 +325,16 @@ CMD [ "npm", "start" ]
 # docker volume prune - delete all the volumes that we have
 
 
+# 59. USING "COPY" VS BIND MOUNTS 
+
+# The reason that we using the COPY snapshot and not just the bind mount (since the bind mount overwritten it anyways),
+# is because we'll use it only during development to reflect changed in our code in the running container instantly.
+# Once we done developing and put the container onto a server, it will run there without commands and without
+# the bind mount. We might use other volumes to ensure that data survives, but will not use this bind mount, because
+# if the container will run in production on a server, there is no connected source code which updates while it's 
+# running. In production we always want to have a snapshot for our code, and that's why we keep the COPY in the
+# Dockerfile, for the production. So we still want to be able to create images with snapshot of our code
+# which we then could use to spin up production ready containers
+ 
 
 
