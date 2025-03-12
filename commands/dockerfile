@@ -25,9 +25,16 @@ RUN npm install
 # exist it will be created
 COPY . /app
 
+# We add the ENV instruction and announce of the environment variable as a PORT with default value of 80.
+# So 80 will be available on the entire application, but we still can override this when we set another environment 
+# variable/port when we use commands in creating container 
+ENV PORT=80
+
 # We expose the port from our isolated conatiner to our local machine, but actually this more instruction for 
 # documentation purposes, so we don't need this for run our container
-EXPOSE 80
+
+# $PORT - our environment variable - docker recognize it by a dolar sign
+EXPOSE $PORT
 
 # Anonymous Volume
 # The path inside the container which should be mapped to some folder outside of the container and where data
@@ -295,8 +302,8 @@ CMD [ "npm", "start" ]
 
 # In short, we create container with read only permission, except from to write in to the feedback and the temp 
 # folders, because we do need to get write permissions when we write in to these folders.
-# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/
-# node_modules feedback-node:volumes  
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:volumes 
+
 
 
 # GENERAL INFORMATION & COMMANDS ON VOLUMES & Managing Docker Volumes
@@ -307,8 +314,8 @@ CMD [ "npm", "start" ]
 
 # So here we have 3 volumes: -v feedback:/app/feedback, -v /app/temp, -v /app/node_modules, the bind mount is not count, 
 # because is not managed by Docker, but we.
-# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/
-# node_modules feedback-node:volumes 
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:volumes 
+
 
 # Example to create a volume independently without also create container. So if we want, we can create a container
 # and then connect to a named volume that exist, so as we used until now, but also to create a new one when we 
@@ -335,6 +342,41 @@ CMD [ "npm", "start" ]
 # running. In production we always want to have a snapshot for our code, and that's why we keep the COPY in the
 # Dockerfile, for the production. So we still want to be able to create images with snapshot of our code
 # which we then could use to spin up production ready containers
+
+
+# 62. WORKING WITH ENVIRONMENT VARIABLES & ".env" FILES
+
+# Environment Variables - help us run one of the same container based on one of the same image in different modes,
+# in different configurations. So to set containers more in a dynamic way when we build an image or when we run container
+
+# We create new image with PORT as the environment variable on the Dockerfile
+# docker build -t feedback-node:env .
+
+# We creating container with the default value of our environment variable PORT that we set on the Dockerfile 
+# that equal to 80. Important that the publish port in the command will be the same as the environment variable,
+# so 80
+
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+# We set port as environment variable in the commads and override our default port value to 8000 when we create container
+# with --env PORT=8000
+
+# docker run -d -p 3000:8000 --env PORT=8000 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+
+# We set port as environment variable as before in the commands, and override our default port value to 8000 when we 
+# create container with slightly different sintax -e PORT=8000. So, --env PORT=8000 equal to --env PORT=8000.
+# We also can set like this multiple environment variable, not just one
+
+# docker run -d -p 3000:8000 -e PORT=8000 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+# Here we spcify a file that contains our environment variable (if we want), and pointing the location of the file,
+# so ./.env => the same folder as we currently navigated in our terminal, and like this we always use the same command,
+# and switch the value only in the file
+
+# docker run -d -p 3000:8000 --env-file ./.env --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+
  
 
 

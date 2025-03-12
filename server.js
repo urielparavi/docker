@@ -45,4 +45,5 @@ app.post('/create', async (req, res) => {
   });
 });
 
-app.listen(80);
+// We access to our environment variable PORT
+app.listen(process.env.PORT);
