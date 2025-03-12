@@ -404,4 +404,30 @@ CMD [ "npm", "start" ]
 
 # SECTION-4
 
-# 69. Case 2: Container to Local Host Machine Communication 
+# The Dockerfile of this section for the node app
+
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "app.js"]
+
+
+# 72. Creating a Container & Communicating to the Web (WWW)
+
+# *Sidenote* - The MongoDB database is not part of the container of node app. The installation of
+# MongoDB is not part of the container. We have no code in the Dockerfile to install MongoDB
+
+# Creating the image for our node app
+# docker build -t favorites-node .     
+
+# Creating container - Here we don't need to create volumes because there is not data that need to survived,
+# we'll connect to another container and it will be our database
+
+# docker run --name favorites -d --rm -p 3000:3000 favorites-node 
