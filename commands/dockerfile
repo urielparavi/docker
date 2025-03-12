@@ -23,12 +23,23 @@ RUN npm install
 # Second path: the path inside of the image where those files should be stored. In our case, it's the sub folder app
 # where all our folders/subfolders, files where the Dockerfile, so all of them will copied to /app. And if this folder not
 # exist it will be created
-COPY . /app
+# COPY . /app
+COPY . .
 
-# We add the ENV instruction and announce of the environment variable as a PORT with default value of 80.
-# So 80 will be available on the entire application, but we still can override this when we set another environment 
-# variable/port when we use commands in creating container 
-ENV PORT=80
+# Build Time Arguments - With those we can plug if different values into our Dockerfile or into our image when we build
+# that image without having to hard code these values into the Dockerfile, and this arguments can be use only in the 
+# Dockerfile on the instructions, except to the CMD [...], because it's runtime command, so it's executed when the
+# container starts. So we set a dynamic argument which then is set as a default value (DEFAULT_PORT) for the dynamic
+# evironment variable. Important to set this here and not at the beginning, since these instuctions add layers
+# to Dockerfile, so when something changes about them, all susbequent layers are rebuilt and re-executed, and 
+# we don't wanna exeute npm install and all the other instructions again
+
+ARG DEFAULT_PORT=80
+
+# We add the ENV instruction and announce of the environment variable as a PORT with default value of our argument -
+# DEFAULT_PORT. So the DEFAULT_PORT will be available on the entire application, but we still can override this when we 
+# set another environment variable/port when we use commands in creating image/container 
+ENV PORT=$DEFAULT_PORT
 
 # We expose the port from our isolated conatiner to our local machine, but actually this more instruction for 
 # documentation purposes, so we don't need this for run our container
@@ -377,6 +388,17 @@ CMD [ "npm", "start" ]
 # docker run -d -p 3000:8000 --env-file ./.env --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
 
 
- 
+#  64. USING BUILD ARGUMENTS (ARG)
+
+# Build Time Arguments - With those we can plug if different values into our Dockerfile or into our image when we build
+# that image without having to hard code these values into the Dockerfile. In our image we use the 'ARG DEFAULT_PORT=80'
+# as example to build-time-argument
+
+# We build our image with our default value of the DEFAULT_PORT (80)
+# docker build -t feedback-node:web-app .     
+
+# We build our image with new DEFAULT_PORT (8000) that we set when we create the image - so we creating the same image
+# with a new port without to changed the Dockerfile and create new imaged based on that
+# docker build -t feedback-node:dev --build-arg DEFAULT_PORT=8000 . 
 
 
