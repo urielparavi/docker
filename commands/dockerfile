@@ -402,3 +402,6 @@ CMD [ "npm", "start" ]
 # docker build -t feedback-node:dev --build-arg DEFAULT_PORT=8000 . 
 
 
+# SECTION-4
+
+# 69. Case 2: Container to Local Host Machine Communication 
