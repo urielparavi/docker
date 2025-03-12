@@ -1,4 +1,4 @@
-FROM node:14
+FROM node
 
 WORKDIR /app
 
@@ -8,14 +8,4 @@ RUN npm install
 
 COPY . .
 
-ARG DEFAULT_PORT=80
-
-ENV PORT=$DEFAULT_PORT
-
-EXPOSE $PORT
-
-# VOLUME [ "/app/node_modules" ]
-
-# For nodemon
-CMD [ "npm", "start" ]
-# CMD [ "node", "server.js" ]
+CMD ["node", "app.js"]
