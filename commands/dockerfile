@@ -431,3 +431,26 @@ CMD ["node", "app.js"]
 # we'll connect to another container and it will be our database
 
 # docker run --name favorites -d --rm -p 3000:3000 favorites-node 
+
+
+# 73. Making Container to Host Communication Work
+
+# taken from app.js
+# mongoose.connect(
+# // we replace the localhost with host.docker.internal to connect our container to the local Database in our machine
+#   'mongodb://host.docker.internal:27017/swfavorites',
+#   { useNewUrlParser: true },
+#   (err) => {
+#     if (err) {
+#       console.log(err);
+#     } else {
+#       app.listen(3000);
+#     }
+#   }
+# );
+
+# host.docker.internal - This special domain is rcongnized by Docker and it's translated to the IP address off
+# our machine as seen from inside the Docker container. We also can use it anywhere we need a domain/URL, not
+# just for MongoDB type of request, but also for an HTTP request if we had some web server runnig on our machine
+
+
