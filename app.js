@@ -68,7 +68,11 @@ app.get('/people', async (req, res) => {
 });
 
 mongoose.connect(
-  'mongodb://host.docker.internal:27017/swfavorites',
+  // 'mongodb://host.docker.internal:27017/swfavorites',
+  // We alter the host.docker.internal to the IP of the continaer of MongoDB that contain the databse
+  // 172.17.0.2 => The IP of the MongoDB database container
+  // 27017 => This the default port
+  'mongodb://172.17.0.2:27017/swfavorites',
   { useNewUrlParser: true },
   (err) => {
     if (err) {

@@ -454,3 +454,29 @@ CMD ["node", "app.js"]
 # just for MongoDB type of request, but also for an HTTP request if we had some web server runnig on our machine
 
 
+# 74. Container to Container Communication: A Basic Solution
+
+# We using MongoDB image from docker hub, so we don't need to create an image. This will create a new container
+# based this MongoDB image, and this image will spin up a MongoDB database
+
+# -d - for to not block the terminal, because by default it's attached mode 
+# docker run -d --name mongodb mongo
+
+# We alter the host.docker.internal to the IP of the continaer of MongoDB that contain the databse 
+
+# We inspect the MongoDB database container to extract his IP, so we can connect to it from our node container.
+# We looking 'IPAdress' under 'NetworkSettings', and then we connect to it from our node container (check in app.js)
+
+# docker container inspect mongodb
+
+
+
+# After we changed the IP address in app.js to the the IP of the MongoDB database container, we re-build the image,
+# since we changed the code.
+
+# docker build -t favorites-node .  
+
+
+# We run our node container and connect to MongoDB database container
+
+# docker run --name favorites -d --rm -p 3000:3000 favorites-node
