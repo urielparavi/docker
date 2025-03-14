@@ -542,3 +542,14 @@ CMD ["node", "app.js"]
 # docker run -d --name mongodb --network favorites-net mongo
 
 
+
+# 81. OUR TARGET APP & SETUP
+
+
+# We create the MongoDB database container from Ducker Hub
+# -p 27017:27017 => Since the backend API in not dockerized and the node API still talks to the database 
+# when it connects - 'mongodb://localhost:27017/course-goals' as if it would be running on our local host machine,
+# for that it work, we exposing our port to 27017 from our MongoDB container to our local machine, so our services can
+# can connect to it trough our local machine, and with that we ensure that our locally running backend which is not
+# dockerized yet, will still be able to talk to it
+# docker run --name mongodb --rm -d -p 27017:27017 mongo 
