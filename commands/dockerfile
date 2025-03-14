@@ -482,7 +482,9 @@ CMD ["node", "app.js"]
 # docker run --name favorites -d --rm -p 3000:3000 favorites-node
 
 
+
 # 75. INTRODUCING DOCKER NETWORKS: ELEGANT CONTAINER TO CONTAINER COMMUNICATION
+
 
 # network - Within a Docker network, all containers can communicate with each other and IPs are automatically resolved
 
@@ -495,6 +497,9 @@ CMD ["node", "app.js"]
 
 # We can inspect all existing networks
 # docker network ls
+
+# docker rm NETWORK_NAME/S - Remove one or more networks
+# docker network prune - Remove all unused networks
 
 # We need to add the network communication and his name for to use the network, and then the network will be
 # part of the favorites-net network, and then it will have the ability to communicate with the container/s that we want.
@@ -535,6 +540,5 @@ CMD ["node", "app.js"]
 # container connection, we don't need to publish the port, so when we created the container of MongoDB we didn't
 # added the publish port (-p...) like the line below
 # docker run -d --name mongodb --network favorites-net mongo
-
 
 
