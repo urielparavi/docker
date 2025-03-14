@@ -72,7 +72,12 @@ mongoose.connect(
   // We alter the host.docker.internal to the IP of the continaer of MongoDB that contain the databse
   // 172.17.0.2 => The IP of the MongoDB database container
   // 27017 => This the default port
-  'mongodb://172.17.0.2:27017/swfavorites',
+  // 'mongodb://172.17.0.2:27017/swfavorites',
+  // mongodb:27017 => The name of MongoDB database container. So if two containers are part of the same network,
+  // we can just put the other containers name. In our case it's 'mongodb', and we plug it as a domain.
+  // So the other Docker container's name will be translated by Docker to the IP address of that container,
+  // and the reson that it will work, it because that both of the containers part of the same network
+  'mongodb://mongodb:27017/swfavorites',
   { useNewUrlParser: true },
   (err) => {
     if (err) {

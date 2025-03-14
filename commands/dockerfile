@@ -419,7 +419,7 @@ COPY . .
 CMD ["node", "app.js"]
 
 
-# 72. Creating a Container & Communicating to the Web (WWW)
+# 72. CREATING A CONTAINER & COMMUNICATING TO THE WEB (WWW)
 
 # *Sidenote* - The MongoDB database is not part of the container of node app. The installation of
 # MongoDB is not part of the container. We have no code in the Dockerfile to install MongoDB
@@ -433,7 +433,7 @@ CMD ["node", "app.js"]
 # docker run --name favorites -d --rm -p 3000:3000 favorites-node 
 
 
-# 73. Making Container to Host Communication Work
+# 73. MAKING CONTAINER TO HOST COMMUNICATION WORK
 
 # taken from app.js
 # mongoose.connect(
@@ -454,7 +454,7 @@ CMD ["node", "app.js"]
 # just for MongoDB type of request, but also for an HTTP request if we had some web server runnig on our machine
 
 
-# 74. Container to Container Communication: A Basic Solution
+# 74. CONTAINER TO CONTAINER COMMUNICATION: A BASIC SOLUTION
 
 # We using MongoDB image from docker hub, so we don't need to create an image. This will create a new container
 # based this MongoDB image, and this image will spin up a MongoDB database
@@ -480,3 +480,61 @@ CMD ["node", "app.js"]
 # We run our node container and connect to MongoDB database container
 
 # docker run --name favorites -d --rm -p 3000:3000 favorites-node
+
+
+# 75. INTRODUCING DOCKER NETWORKS: ELEGANT CONTAINER TO CONTAINER COMMUNICATION
+
+# network - Within a Docker network, all containers can communicate with each other and IPs are automatically resolved
+
+
+# docker network --help - To see our options/information about the network
+
+# With network unlike volume, Docker will not automatically create them for us when we creating the container.
+# We need to create them on our own, and then we give it a name. In our case it's 'favorites-net'
+# docker network create favorites-net
+
+# We can inspect all existing networks
+# docker network ls
+
+# We need to add the network communication and his name for to use the network, and then the network will be
+# part of the favorites-net network, and then it will have the ability to communicate with the container/s that we want.
+# docker run -d --name mongodb --network favorites-net mongo
+
+# mongoose.connect(
+#   // mongodb:27017 => The name of MongoDB database container. So if two containers are part of the same network,
+#   // we can just put the other containers name. In our case it's 'mongodb', and we plug it as a domain.
+#   // So the other Docker container's name will be translated by Docker to the IP address of that container,
+#   // and the reson that it will work, it because that both of the containers part of the same network
+#   'mongodb://mongodb:27017/swfavorites',
+#   { useNewUrlParser: true },
+#   (err) => {
+#     if (err) {
+#       console.log(err);
+#     } else {
+#       app.listen(3000);
+#     }
+#   }
+# );
+
+# We build the image again because we changed our code above in app.js
+# docker build -t favorites-node .
+
+# We create the our new favorites container from favorites-node and we connect it to the netowrk and his name.
+# So the same network that we used in MongoDB container, so both of them will be part of the same network
+# docker run --name favorites --network favorites-net -d --rm -p 3000:3000 favorites-node
+
+# We inspected the logs of the favorites container and saw warning which proves that it works, because 
+# it's not connection an error
+# docker logs favorites
+
+# *Sidenote* - When containers communicate/connect with each other, we don't need to publish any port when running
+# that to be connected to container (The MongoDB container). So in our case when we run the MongoDB container, we don't 
+# have the -p option, because -p only required if we plan connecting to something in that container from our local 
+# machine, or from outside the container network. In our case the favorites container communicate with the MongoDB 
+# container, not our local machine, and it will part of the same Docker network. So because we have container to 
+# container connection, we don't need to publish the port, so when we created the container of MongoDB we didn't
+# added the publish port (-p...) like the line below
+# docker run -d --name mongodb --network favorites-net mongo
+
+
+
