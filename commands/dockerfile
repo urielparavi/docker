@@ -99,18 +99,18 @@ CMD [ "npm", "start" ]
 
 # ENTERING INTERACTIVE MODE 
 
-# In this example we illustrate a case where we only want to run software/app and not run it as a web server - so, we want 
-#  to be in attached state, but in listening mode and also to be able input something, so interact with our container
+# In this example we illustrate a case where we only want to run software/app and not run it as a web server - so, we 
+# want to be in attached state, but in listening mode and also to be able input something, so interact with our container
 
-# - i - t / -it => With the combining of the i and the t flags we'll able to be in listening mode, and also to input something 
-# when we run our container. So the container will listen for our input, and we'll also get a terminal exposed by the 
-# container, which is the device where we enter the input (for more details on -i or -t flags, check docker run --help)
-# docker run -it f5396224a0d1
+# - i - t / -it => With the combining of the i and the t flags we'll able to be in listening mode, and also to input 
+# something when we run our container. So the container will listen for our input, and we'll also get a terminal exposed 
+# by the container, which is the device where we enter the input (for more details on -i or -t flags, check docker run 
+# --help) docker run -it f5396224a0d1
 
 # If we restarting the container and we want to listen mode and also to be able to input something mode, we'll use -a -i.
 
-# So the difference between the -it/-i -t and the -a -i, is the -it for when we running our container, and -a -i when we 
-# restart our container (for more details on -a or -i flags, check docker start --help)
+# So the difference between the -it/-i -t and the -a -i, is the -it for when we creating/running our container, and -a -i 
+# when we restart our container (for more details on -a or -i flags, check docker start --help)
 # docker start -a -i relaxed_grothendieck
 
 
@@ -597,3 +597,52 @@ CMD [ "node", "app.js" ]
 
 # We run this containe again and exposing his ports for the frontend can communicate with our backend container
 # docker run --name goals-backend --rm -d -p 80:80 goals-node
+
+
+
+# 84. MOVING THE REACT SPA INTO A CONTAINER
+
+# From node => Since the frontend setup depends on Node. it's not Node application, but it uses Node to spin up the
+# development server which serves this React application, and also Node is also used to optimize the React code which 
+# we write, and to transorm it into code the browser understands 
+FROM node
+
+WORKDIR /app  
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [ "npm", "start" ]
+
+
+# We create our frontend docker image
+# docker build -t goals-react .
+
+# We create/run container based on goals-react image that we just build
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+# Nowadays we don't need to add the "-it" because Docker fixed this problem, so we can ignore this line.
+
+# The problem was that the container is not running anymore without the "-it" flag, because in old versions
+# of Docke we nedded to run it in interactive mode by adding the "-it" option to the Docker run command, so
+# we dont just start the container and be done with it ,but also let the container know that we want to able 
+# to enter commands and interact with it. We don't using the interactive mode here, but React project is set
+# up that if it doesn't receive this input trigger, it will stop the server   
+# docker run --name goals-frontend --rm -d -p 3000:3000 -it goals-react 
+
+# The right line command
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react 
+
+# docker stop goals-frontend goals-backend mongodb    
+
+
+
+
+
+
+
