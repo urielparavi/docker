@@ -553,3 +553,47 @@ CMD ["node", "app.js"]
 # can connect to it trough our local machine, and with that we ensure that our locally running backend which is not
 # dockerized yet, will still be able to talk to it
 # docker run --name mongodb --rm -d -p 27017:27017 mongo 
+
+
+
+# 83. DOCKERIZING THE NODE APP
+
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 80
+
+CMD [ "node", "app.js" ]
+
+
+# We build the backend image
+# docker build -t goals-node . 
+
+# We run a container based goals-node image
+# docker run --name goals-backend --rm goals-node
+
+# Here we get an error to connect to MongoDB, since we have MongoDB running in acontainer exposing its port, but in our 
+# Dockerized backend application we reaching out to localhost - 'mongodb://localhost:27017/course-goals', and that now
+# inside the container, means that we trying to access some other service on this port inside of that same backend 
+# container, not on our host machine.
+# So we use the special alternative domain or address - 'host.docker.internal' - That's special address/indentifier,
+# which is translated to our real local host machine IP by Docker
+
+# In short, Since we publish the MongoDB container on port 27017 on our local machine for our backend application
+# before we Dockerized it and now we Dockrized the backend application, we cant communicate with our MongoDB container
+# in localhost:27017, because we need to connect with that container on the local machine, since it's public there.
+# So when we need to communicate between container/s and our local machine, we need to use 'host.docker.internal',
+# unless we did inspect the IP of container that we want to connected to or that we use network
+
+# Since we changed our code in the backend, we re-build the image
+# docker build -t goals-node .
+
+# We run this containe again and exposing his ports for the frontend can communicate with our backend container
+# docker run --name goals-backend --rm -d -p 80:80 goals-node
