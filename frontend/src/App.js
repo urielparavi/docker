@@ -17,7 +17,7 @@ function App() {
         // Here we connect to local host in our local machine, because we can't connect to "goals-backend" that
         // in the network, since React/the frontend code run on the browser. it's not executed inside of the container
         // or on some server
-        const response = await fetch('http://localhost:3000/goals');
+        const response = await fetch('http://localhost/goals');
 
         const resData = await response.json();
 
@@ -42,7 +42,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/goals', {
+      const response = await fetch('http://localhost/goals', {
         method: 'POST',
         body: JSON.stringify({
           text: goalText,
@@ -81,7 +81,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/goals/' + goalId, {
+      const response = await fetch('http://localhost/goals/' + goalId, {
         method: 'DELETE',
       });
 

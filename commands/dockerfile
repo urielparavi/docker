@@ -672,6 +672,7 @@ CMD [ "npm", "start" ]
 # or the Database, and the part that would interact with the API is not executed in the Docker environment
 # docker run --name goals-frontend --rm -d -p 3000:3000 goals-react 
 
+# *****We used this way at the end, since with the proxy we got an error*****
 # The previous way we used before adding the "proxy" in package.json
 # Here we run our goals-backend container, and publish it on port 80 on our local host machine, so that our 
 # separate React application is able to talk to that
@@ -685,6 +686,39 @@ CMD [ "npm", "start" ]
 # inside the container network.
 # docker run --name goals-backend --rm -d --network goals-net goals-node
 
+# docker stop goals-frontend goals-backend mongodb  
+
+
+
+87. Adding Data Persistence to MongoDB with Volumes
+
+
+# The problem with creating MongoDB contgainer like that, that when we start MongoDB container the data not persist
+# docker run --name mongodb --rm -d --network goals-net mongo 
+
+# We adding named volume that will store our data in the container on our local machine
+# /data/db => The place where our database will save in our container - we know this from documentation -
+# https://hub.docker.com/_/mongo. And now our data will survive from container to container
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+
+# For security we adding environment variables for allow access to containers to communicate with our MongoDB container, 
+# only if they have name and password (we nedded to add ?authSource=admin also in the backend for it work) 
+# in mongoose.connect()
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net -e MONGO_INITDB_ROOT_USERNAME=uriel -e MONGO_INITDB_ROOT_PASSWORD=secret mongo
+
+# Since we changed our code in the backend container, we re-build again the image
+# docker build -t goals-node .
+
+# ***We run our application by running all the containers.***
+
+# docker run --name goals-backend --rm -d -p 80:80 --network goals-net goals-node
+
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-reac
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# We stop them
 # docker stop goals-frontend goals-backend mongodb  
 
 
