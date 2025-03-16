@@ -63,7 +63,7 @@ VOLUME [ "/app/feedback" ]
 CMD [ "npm", "start" ]
 
 
-# COMMANDS
+COMMANDS
 
 # docker build . => With the dot we tell Docker that the Dockerfile will be in the same folder as we're running this command
 
@@ -78,7 +78,7 @@ CMD [ "npm", "start" ]
 # docker logs feedback-app (feedback-app -containers name)
 
 
-# DELETE IMAGES & CONTAINERS - *Sidenote* We can only remove images if we remove their containers first
+DELETE IMAGES & CONTAINERS - *Sidenote* We can only remove images if we remove their containers first
 
 # docker container prune - Allow us to delete all our stoped containers
 # docker rm - Allow us to delete specific or multiple containers with their names
@@ -97,7 +97,7 @@ CMD [ "npm", "start" ]
 # docker image inspect 05c377af849a - Give us information about the image
 
 
-# ENTERING INTERACTIVE MODE 
+ENTERING INTERACTIVE MODE 
 
 # In this example we illustrate a case where we only want to run software/app and not run it as a web server - so, we 
 # want to be in attached state, but in listening mode and also to be able input something, so interact with our container
@@ -127,7 +127,7 @@ CMD [ "npm", "start" ]
 # docker cp youthful_archimedes:/test/test.txt dummy
 
 
-# NAMING & TAGGING CONTAINERS AND IMAGES
+NAMING & TAGGING CONTAINERS AND IMAGES
 
 # Here we give a name for container
 # docker run -p 3000:80 -d --rm --name goalsapp 74da73ce6927 (for more details check docker run --help)
@@ -144,7 +144,7 @@ CMD [ "npm", "start" ]
 # We run and give the container name 'goalsapp' and plug in the image with the tag 'goals:latest' instead the image ID
 # docker run -p 3000:80 -d --rm --name goalsapp goals:latest
 
-# PUSHING IMAGES TO DOCKERHUB 
+PUSHING IMAGES TO DOCKERHUB 
 
 # *Sidenote* - if we push/pull to a private registry (other provider), we need to inlude the host, so the url of the provider
 # for example - HOST:NAME
@@ -167,7 +167,7 @@ CMD [ "npm", "start" ]
 # docker push urielpa/node-hello-world(:tagname)
 
 
-# PULLING & USING SHARED IMAGES THROUGH DOCKERHUB
+PULLING & USING SHARED IMAGES THROUGH DOCKERHUB
 
 # *Sidenote* when we pull, we always pull the latest image of that name from your container registry.
 # So if in the meantime we rebuild the image, and push an updated imaged to the registry,
@@ -180,7 +180,7 @@ CMD [ "npm", "start" ]
 
 # docker pull urielpa/node-hello-world   
 
-# EXAMPLES OF CREATEING IMAGES & CONTAINERS (WITH VOLUMES)
+EXAMPLES OF CREATEING IMAGES & CONTAINERS (WITH VOLUMES)
 
 # We create image with the name feedback-node
 # docker build -t feedback-node .
@@ -192,7 +192,7 @@ CMD [ "npm", "start" ]
 # docker run -d -p 3000:80 --rm --name feedback-app feedback-node:volumes
 
 
-# VOLUMES COMMANDS
+VOLUMES COMMANDS
 
 # docker volumes ls - give us the list of the volumes   
 
@@ -211,7 +211,7 @@ CMD [ "npm", "start" ]
 # Named volume - volume that can persist from container to a new container even if his previous container deleted
 
 
-# CREATING ANONYMOUS VOLUMES & NAMED VOLUMES & DLEETING THEM
+CREATING ANONYMOUS VOLUMES & NAMED VOLUMES & DLEETING THEM
 
 # *Sidenote* if we're not adding --rm when we creating our container with anonymous volume, we'll need to delete the  
 # volume and also the container, but if we adding the --rm, it will erase both with the container
@@ -230,7 +230,7 @@ CMD [ "npm", "start" ]
 # Delete all volumes - docker volume prune 
 
 
-# BIND MOUNTS
+BIND MOUNTS
 # *Sidenote* - Bind Mount is not 
 
 # Bind Mounts - It's similar to volume, but the difference that we're managed the path and the folder of our app in our 
@@ -265,7 +265,7 @@ CMD [ "npm", "start" ]
 # docker run -d -p 3000:80 --name feedback-app -v feedback:/app/feedback -v "%cd%":/app feedback-node:volumes
 
 
-# COMBINING & MERGING DIFFERENT VOLUMES - Creating named volume & bind mount & anonymous volume
+COMBINING & MERGING DIFFERENT VOLUMES - Creating named volume & bind mount & anonymous volume
 
 
 # -v /app/node_modules - anonymous volume because it has no name, and we can create it also like this: 
@@ -289,7 +289,7 @@ CMD [ "npm", "start" ]
 #   },
 
 
-# ADDING READ ONLY VOLUMES & OVERWRITING AGAIN WITH ANONYMOUS VOLUME
+ADDING READ ONLY VOLUMES & OVERWRITING AGAIN WITH ANONYMOUS VOLUME
 
 # The idea here, is that we want to restrict our container to read only, but still keep the permission to write
 # in to feedback and temp folders, because data will go/change there, since all other changes will come from our
@@ -317,7 +317,7 @@ CMD [ "npm", "start" ]
 
 
 
-# GENERAL INFORMATION & COMMANDS ON VOLUMES & Managing Docker Volumes
+GENERAL INFORMATION & COMMANDS ON VOLUMES & Managing Docker Volumes
 
 # docker volume --help
 
@@ -355,7 +355,7 @@ CMD [ "npm", "start" ]
 # which we then could use to spin up production ready containers
 
 
-# 62. WORKING WITH ENVIRONMENT VARIABLES & ".env" FILES
+62. WORKING WITH ENVIRONMENT VARIABLES & ".env" FILES
 
 # Environment Variables - help us run one of the same container based on one of the same image in different modes,
 # in different configurations. So to set containers more in a dynamic way when we build an image or when we run container
@@ -388,7 +388,7 @@ CMD [ "npm", "start" ]
 # docker run -d -p 3000:8000 --env-file ./.env --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
 
 
-#  64. USING BUILD ARGUMENTS (ARG)
+ 64. USING BUILD ARGUMENTS (ARG)
 
 # Build Time Arguments - With those we can plug if different values into our Dockerfile or into our image when we build
 # that image without having to hard code these values into the Dockerfile. In our image we use the 'ARG DEFAULT_PORT=80'
@@ -419,7 +419,7 @@ COPY . .
 CMD ["node", "app.js"]
 
 
-# 72. CREATING A CONTAINER & COMMUNICATING TO THE WEB (WWW)
+72. CREATING A CONTAINER & COMMUNICATING TO THE WEB (WWW)
 
 # *Sidenote* - The MongoDB database is not part of the container of node app. The installation of
 # MongoDB is not part of the container. We have no code in the Dockerfile to install MongoDB
@@ -433,7 +433,7 @@ CMD ["node", "app.js"]
 # docker run --name favorites -d --rm -p 3000:3000 favorites-node 
 
 
-# 73. MAKING CONTAINER TO HOST COMMUNICATION WORK
+73. MAKING CONTAINER TO HOST COMMUNICATION WORK
 
 # taken from app.js
 # mongoose.connect(
@@ -454,7 +454,7 @@ CMD ["node", "app.js"]
 # just for MongoDB type of request, but also for an HTTP request if we had some web server runnig on our machine
 
 
-# 74. CONTAINER TO CONTAINER COMMUNICATION: A BASIC SOLUTION
+74. CONTAINER TO CONTAINER COMMUNICATION: A BASIC SOLUTION
 
 # We using MongoDB image from docker hub, so we don't need to create an image. This will create a new container
 # based this MongoDB image, and this image will spin up a MongoDB database
@@ -483,7 +483,7 @@ CMD ["node", "app.js"]
 
 
 
-# 75. INTRODUCING DOCKER NETWORKS: ELEGANT CONTAINER TO CONTAINER COMMUNICATION
+75. INTRODUCING DOCKER NETWORKS: ELEGANT CONTAINER TO CONTAINER COMMUNICATION
 
 
 # network - Within a Docker network, all containers can communicate with each other and IPs are automatically resolved
@@ -543,7 +543,7 @@ CMD ["node", "app.js"]
 
 
 
-# 81. OUR TARGET APP & SETUP
+81. OUR TARGET APP & SETUP
 
 
 # We create the MongoDB database container from Ducker Hub
@@ -556,7 +556,7 @@ CMD ["node", "app.js"]
 
 
 
-# 83. DOCKERIZING THE NODE APP
+83. DOCKERIZING THE NODE APP
 
 FROM node
 
@@ -600,7 +600,7 @@ CMD [ "node", "app.js" ]
 
 
 
-# 84. MOVING THE REACT SPA INTO A CONTAINER
+84. MOVING THE REACT SPA INTO A CONTAINER
 
 # From node => Since the frontend setup depends on Node. it's not Node application, but it uses Node to spin up the
 # development server which serves this React application, and also Node is also used to optimize the React code which 
@@ -638,7 +638,57 @@ CMD [ "npm", "start" ]
 # The right line command
 # docker run --name goals-frontend --rm -d -p 3000:3000 goals-react 
 
-# docker stop goals-frontend goals-backend mongodb    
+# docker stop goals-frontend goals-backend mongodb  
+
+
+
+85. Adding Docker Networks for Efficient Cross-Container Communication
+
+
+# docker network ls
+
+# We create a network
+# docker network create goals-net 
+
+# We running again the MongoDB container and put it into that network.
+# docker run --name mongodb --rm -d --network goals-net mongo 
+
+# Since we used in mongoose.connect() "host.docker.internal", we need to change it to "mongodb",
+# because the MongoDB container not publishing right now the port 27017 => "-p 27017:27017" like before in our local 
+# machine. So when we're published this port on our local machine, the backend container was connect to it with
+# "host.docker.internal", since our MongoDB container was on our local machine published 27017 port.
+# Now, we need to replace it with "mongodb", because we wanna connect it to the network, so the MongoDB container
+# and the backend container will be able to connect on the network,  So for this we need to rebuild the image again.
+# docker build -t goals-node .
+
+# We run our backend container with the network being used.
+# docker run --name goals-backend --rm -d --network goals-net goals-node
+
+# We build the frontend container and connect to our localhost in our local machine (check in App.js)
+# docker build -t goals-react .
+
+# We create our goals-frontend container based on goal-react image and not using the network, since the part which
+# runs in the container - the development server, doesn't care about the network and it doesn't interact with Node API
+# or the Database, and the part that would interact with the API is not executed in the Docker environment
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react 
+
+# The previous way we used before adding the "proxy" in package.json
+# Here we run our goals-backend container, and publish it on port 80 on our local host machine, so that our 
+# separate React application is able to talk to that
+# docker run --name goals-backend --rm -d -p 80:80 --network goals-net goals-node
+
+# The new and the right way
+# Here we're not publishing the port 80, since we added the "proxy": "http://goals-backend:80" in package.json.
+# "proxy": This setting is used to specify a backend server that the frontend should communicate, and setting a "proxy" 
+# helps avoid CORS issues by forwarding requests to the backend.
+# This solution is more secure, since only the frontend app (port 3000) is exposed and all backend calls are proxied 
+# inside the container network.
+# docker run --name goals-backend --rm -d --network goals-net goals-node
+
+# docker stop goals-frontend goals-backend mongodb  
+
+
+
 
 
 
