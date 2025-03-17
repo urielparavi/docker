@@ -831,6 +831,11 @@ CMD [ "npm", "start" ]
 
 
 
+94. Creating a Compose File
+
+# link for details on Compose file versions and upgrading - https://docker-docs.uclv.cu/compose/compose-file/compose-versioning/
+
+
 
 
 
