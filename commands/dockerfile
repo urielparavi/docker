@@ -744,6 +744,7 @@ CMD [ "npm", "start" ]
 # Here we added the nodemon in package.json, and We needed to add -L in the scripts for nodemon work in windows
 #  because we using WSL 2
 # "start": "nodemon --legacy-watch app.js"
+# Solution 2: "start": "nodemon -L server.js" 
 
 # Since we changed our code - the package.json and the Dockerfile, we re-build the image again
 # docker build -t goals-node .
@@ -761,7 +762,7 @@ CMD [ "npm", "start" ]
 
 
 # We add environment variables in the Dockerfile:
-  
+
 FROM node
 
 WORKDIR /app
@@ -797,6 +798,37 @@ CMD [ "npm", "start" ]
 
 # After that we added the .dockerignore, so when we create the image we'll not add to the image things like -
 # node_modules, git, some private folders etc..
+
+
+
+89. Live Source Code Updates for the React Container (with Bind Mounts)
+
+
+ 
+# We add Bind Mount to bind the src folder in the container to the src folder in our local machine in the frontend,
+# so that whenever we change the code in src folder in our local machine, it will change/reflected on the src folder
+# in the continer
+
+# -e WATCHPACK_POLLING=true - Environment Variable for live relode. We can also add this in package.json, so:
+# change the start script => "start": "WATCHPACK_POLLING=true react-scripts start", and re-build the image.
+
+# ***Sidenote*** - Since we only use the Bind Mount in the src folder in our local machine to src folder in the 
+# container, we don't need to add anonymous volume for to take the node_modules from the container, so from the 
+# first snapshot when we created the image, because the node_modules is not in the src folder, but his brothers
+
+# -it - So we can interaction with the container (we also could exist with ctrl + c in interaction mode) 
+
+# docker run -e WATCHPACK_POLLING=true -v "%cd%"/src:/app/src --name goals-frontend --rm -p 3000:3000 -it goals-react
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -e MONGODB_USERNAME=uriel -d --rm -p 80:80 --network goals-net goals-node
+
+# docker stop goals-frontend goals-backend mongodb  
+
+# After that we added the .dockerignore, so when we create the image we'll not add to the image things like -
+# node_modules, git, some private folders etc..
+
 
 
 
