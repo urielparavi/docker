@@ -89,7 +89,8 @@ mongoose.connect(
   // 'mongodb://mongodb:27017/course-goals',
   // For to get access to communicate with the MongoDB container DB, we needed to added this with this format
   // which understood by Mongo DB
-  'mongodb://uriel:secret@mongodb:27017/course-goals?authSource=admin',
+  // 'mongodb://uriel:secret@mongodb:27017/course-goals?authSource=admin',
+  `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@mongodb:27017/course-goals?authSource=admin`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

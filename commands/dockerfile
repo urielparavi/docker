@@ -714,12 +714,90 @@ CMD [ "npm", "start" ]
 
 # docker run --name goals-backend --rm -d -p 80:80 --network goals-net goals-node
 
-# docker run --name goals-frontend --rm -d -p 3000:3000 goals-reac
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
 
 # docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
 
 # We stop them
 # docker stop goals-frontend goals-backend mongodb  
+
+
+
+88. Volumes, Bind Mounts & Polishing for the NodeJS Container
+
+
+# ***We create our container with a bind mount, named volume and anonymous volume***
+
+# -v "%cd%":/app => Bind Moutn - So all our changes in our local machine in our root directory in the backend
+# (since the Dockerfile there) will be reflect in the continaer in the working/root directory (app folder).
+
+# -v logs:/app/logs => Named volume - So the logs in the backend will save from container to container,
+# and since the path of the named volume longer then the path of the bind mount, he will not be affected from
+# our changes in the local machine.
+
+# -v /app/node_modules => Anonymous Volume - So that if we change something in the local machine, the node_modules
+# will taken from the container - so from the snapshot when the image created (and run npm install), and  not from
+# the local machine, since we mabe not have the node_modules there, or that they different/outdated.
+
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -d --rm -p 80:80 --network goals-net goals-node
+
+# Here we added the nodemon in package.json, and We needed to add -L in the scripts for nodemon work in windows
+#  because we using WSL 2
+# "start": "nodemon --legacy-watch app.js"
+
+# Since we changed our code - the package.json and the Dockerfile, we re-build the image again
+# docker build -t goals-node .
+
+# ***We run our applicatin with all the containers***
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -d --rm -p 80:80 --network goals-net goals-node
+
+# For stop them
+# docker stop goals-frontend goals-backend mongodb  
+
+
+# We add environment variables in the Dockerfile:
+  
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 80
+
+ENV MONGODB_USERNAME=root
+ENV MONGODB_PASSWORD=secret
+
+
+CMD [ "npm", "start" ]
+
+
+# We access them from our backend - `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@mongodb:27017/course-goals?authSource=admin`,
+
+# Since we changed our code in the Dockerfile and app.js, we re-build the image again
+# docker build -t goals-node .
+
+# ***We run our applicatin with all the containers***
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+# We run the container, and provide our name as environment variable
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -e MONGODB_USERNAME=uriel -d --rm -p 80:80 --network goals-net goals-node
+
+# After that we added the .dockerignore, so when we create the image we'll not add to the image things like -
+# node_modules, git, some private folders etc..
+
 
 
 
