@@ -845,6 +845,24 @@ CMD [ "npm", "start" ]
 
 
 
+97. Docker Compose Up & Down
+
+
+# It will start all the services that defined in the compose file, and it will not just start the containers, it
+# also will pull and build all the images that might be required.
+# docker-compose up 
+
+# If we want to start with detached mode, since the default is attached mode
+# docker-compose up -d 
+
+# Stop all the services and remove all containers and the default network it created and so on..
+# docker-compose down 
+
+# For delete volumes. The reason that in deleted when we stop the services, it's because typically we do want
+# to persist data with volumes.
+# docker-compose down -v
+
+
 
 
 
