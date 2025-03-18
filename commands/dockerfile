@@ -837,6 +837,15 @@ CMD [ "npm", "start" ]
 
 
 
+95. Diving into the Compose File Configuration
+
+
+# ***Sidenote*** when we use compose, we don't need to add --rm, because it will deleted automatically
+# and for detached mode we can specify it when we start all services together 
+
+
+
+
 
 
 

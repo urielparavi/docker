@@ -1,6 +1,41 @@
+# The version of the Docker Compose document, so the Docker compose specification wa wanna use and the version
+# we defined here has an effect on the features we can use in this compose file
 version: '3.8'
 services:
   mongodb:
+    # image - It can be image name which will be looked up locally and in the Docker hub repository, it can be a full URL
+    # to another repository where this image stored, it could be our own repository, or a custom image which we build
+    # on our system like 'goals-node' that we builted
+    image: 'mongo'
+    volumes:
+      # /data/db => The place where our database will save in our container - we know this from documentation
+      - data/data/db
+    # environment:
+        # We can specify our environments with a dash and colon, or with equal sign. So dash is more for we specify a 
+        # single value, with a colon it creates a yaml object, so we dont need dashes
+    #   MONGO_INITDB_ROOT_USERNAME: uriel
+    #   MONGO_INITDB_ROOT_PASSWORD: secret
+    #   # - MONGO_INITDB_ROOT_USERNAME=uriel
+    env_file:
+    # ./ - Means that it will start in the same direcotry as the docker-compose is in    
+      - ./env/mongo.env
+    # We can add network by adding the networks key and specify all the networks this container should belong to,
+    # but many cases, we don't need, since Docker Compose automatically create a new environment for all the services
+    # specified in the compose file, and it will add all the services to that network out of the box.
+    # So all these services which are defined in one and the same compose file, will already be part of one and the 
+    # same network that was created for them by Docker.  
+    # networks:
+     # Example of network if we wanna use our own network.
+     # *Sidenote* - If we using like this in network, the MongoDB service will create also the default network but also
+     # this special network that we specify here
+     # -golas-net
+  # backend:
 
-  backend:
-  frontend:
+  # frontend:
+
+# For named volumes we should add key next to services, so on the same level as services, and any named volumes we using
+# in our services have to be listed here - in this case 'data', and we simply add this with a colon.
+# *Additional note* - If we use the same volume name in different services, the volume will be shared. So different 
+# containers can use the same volume, the same folder on our hosting machine
+volumes:
+  data:
