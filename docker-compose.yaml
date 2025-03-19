@@ -33,7 +33,8 @@ services:
     # If we want to specify existing image 
     # image: 'goals-node'
 
-    # We also give Docker Compose all the information it needs to build an image
+    # We also give Docker Compose all the information it needs to build an image, but if it exist it's not re-build it.
+    # Only if the imaged changed
     # First way:
     # ./backend - The build want to know where to find the Dockerfile that should be built. In its simplest form,
     # we can use a relative path, for example: './' - so we saying i'ts in the same folder as the docker-compose.yaml file
@@ -82,7 +83,26 @@ services:
     # create this backend container. In our case it only depends on mongodb, but it could be depend on multiple services
     depends_on: 
       - mongodb      
-  # frontend:
+  frontend:
+    # If the image already exist it will not re-build the image
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      # Since the node_modules is outside to src folder, we don't need to worry that our node_modules from our local
+      # machine override the node_modules in the container
+      - ./frontend/src:/app/src
+     #  stdin_open - For opening standard input, so we let Docker know that this service needs an open input connection
+    stdin_open: true
+    # tty - TTY flag for attaching the terminal. 
+    # So "-it" flag is just combination of the dash input flag (stdin_open: true) and the TTY flag (tty: true).
+    # And with 2 stdin_open, tty options added, the frontend container
+    # will be started in this interactive mode even if we started in detached mode, it internally still knows that
+    # it's able to receive input and start up correctlly
+    tty: true
+    depends_on:
+      # We make sure that we only starts the frontend if the backend start up 
+      - backend
 
 # For named volumes we should add key next to services, so on the same level as services, and any named volumes we using
 # in our services have to be listed here - in this case 'data', and we simply add this with a colon.
