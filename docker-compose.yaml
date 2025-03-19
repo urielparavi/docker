@@ -29,8 +29,59 @@ services:
      # *Sidenote* - If we using like this in network, the MongoDB service will create also the default network but also
      # this special network that we specify here
      # -golas-net
-  # backend:
+  backend:
+    # If we want to specify existing image 
+    # image: 'goals-node'
 
+    # We also give Docker Compose all the information it needs to build an image
+    # First way:
+    # ./backend - The build want to know where to find the Dockerfile that should be built. In its simplest form,
+    # we can use a relative path, for example: './' - so we saying i'ts in the same folder as the docker-compose.yaml file
+    # or to say it's in the './backend' folder in this case
+    build: ./backend
+    # Second way:
+    # The longer form to build is that we have an object with nested keys
+    # build: 
+      #***Sidenote about the context*** - It can be the path to our Dockerfile, but it will also be the place where the
+      # the Dockerfile is built thereafter, so where the image will be generated. So our context should be set to a 
+      # folder which includes everything the Dockerfile might be referring to. So if in our Dockerfile we're copying some
+      # folder into the image, the context must be set to a folder that includes that to be copied folder. In this case
+      # this would be the case - the Dockerfile in the backend folder only refers to other folders which are included in
+      # the backend folder. So setting the context to backend would be okay, but if our Dockerfile would be in some other
+      # nested folder and needs access to folders outside of that nested folder, then our context should be set to a
+      # higher level folder. 
+      # context - The path to the folder that holds the Dockerfile
+    #   context: ./backend
+      # dockerfile - dockerfile key which specifies the file name. If our file is named Dockerfile, there is no need to 
+      # use this longer form, but if we named it differently like Dockerfile-dev, then this is how we could tell Docker
+      # Compose which Dockerfile to use
+    #   dockerfile: Dockerfile-dev
+    #   args:
+    #     some-arg: 1
+    ports:
+      # We could specify here multiple ports
+      # The second port is the container internal port, and the first is the port on our local machine where it will be 
+      # exposed.
+      - '80:80'
+    volumes:
+      # Our named volume
+      - logs:/app/logs
+       # Our bind mount volume
+       # With Docker Compose we're allowed to use a relative path - relative from the docker-compose.yaml, not like the 
+       # Docker run that we needed the absolute path
+      - ./backend:/app
+       # Our anonymous volume
+      - /app/node_modules
+    env_file:
+    # The file where our environment variables
+      - ./env/backend.env  
+    # depends_on - When we create and launch multiple services/containers at the same time, sometimes one container
+    # might depend on another container to be up and running already. So for example here, our backend depends on 
+    # mongodb container being up and runing already, because our backend container wants to connect to MongoDB.
+    # So we let compose know  that it should first bring up mongodb and only once that is up and runing, it should 
+    # create this backend container. In our case it only depends on mongodb, but it could be depend on multiple services
+    depends_on: 
+      - mongodb      
   # frontend:
 
 # For named volumes we should add key next to services, so on the same level as services, and any named volumes we using
@@ -39,3 +90,4 @@ services:
 # containers can use the same volume, the same folder on our hosting machine
 volumes:
   data:
+  logs:
