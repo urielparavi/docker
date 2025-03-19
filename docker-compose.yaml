@@ -10,6 +10,9 @@ services:
     volumes:
       # /data/db => The place where our database will save in our container - we know this from documentation
       - data:/data/db
+    # If we wanna assign our own container name we can do this by adding the 'container_name' option and set our own 
+    # name, so it will be 'mongodb'  
+    # container_name: mongodb  
     # environment:
         # We can specify our environments with a dash and colon, or with equal sign. So dash is more for we specify a 
         # single value, with a colon it creates a yaml object, so we dont need dashes

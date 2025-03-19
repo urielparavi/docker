@@ -959,8 +959,23 @@ volumes:
 
 
 
+    100. Building Images & Understanding Container Names
 
 
+# docker-compose up --help
+
+
+# If we want to reforce it and rebuild images because we know that something changed in the code, and therefore a new 
+# image/s should be built
+# docker-compose up --build
+
+# ****Sidenote*** -  This will only apply to images that we 'build' in docker-compose file, so it will not affect on 
+# images from Docker Hub and so on, only imaged that we used 'build: ./frontend' for example in 'docker-compose file'
+
+# If we want to build any custom images defined in a docker-compose file. So if we just want to build images without
+# starting a container thereafter, we could trigger this by running 'docker-compose file build'
+# docker-compose build
+ 
 
 
 
