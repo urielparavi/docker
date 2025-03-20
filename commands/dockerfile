@@ -1002,6 +1002,7 @@ volumes:
 # it runs inside of this container, evet that right now it's still not too useful, because it's only in the container,
 # but it's just first demo
 
+# In short words here we are adding a command to the container but it will still run
 # docker exec -it priceless_rosalind npm init
 
 
@@ -1015,11 +1016,50 @@ volumes:
 # ineractive enter some node code mode and instead execute npm init. And because we overrode the default command,
 # the container will finish thereafter and stop the container.
 
+# In short words here override the default command (run -it node), so it will do the command (npm init) and stop ongoing 
+# the connection, so the container will stop
 # docker run -it node npm init 
 
 
-# *Sidenote* -  docker exec could be also useful for to read some log files which were written inside of a container
+# *Sidenote* - docker exec could be also useful for to read some log files which were written inside of a container
 # without interrupting the main process
+
+
+
+106. Building a First Utility Container
+
+
+# We creating the utility container with extra slim operating system layer, so it will be smaller node image,
+# since right now we only need the package.json
+from node:14-alpine
+
+# We adding the working/root directory and set this to app, to define which folder will be used by commands executed
+# on this container and on this image, and that includes commands we enter with 'docker run'
+WORKDIR /app    
+
+
+# We don't use it because we want that our project more flexible, we don't want to restrict the image to just be able
+# to run the init command, we want to give the user full control over his image
+# CMD npm init
+
+
+# We create this node-util image
+# docker build -t node-util . 
+
+
+# '-it' - We need to do this with interactvie mode (with the open connection input and attaching the termianl) to stay
+# connected and to be able to enter values.
+
+# -v "%cd%":/app - We set this bind mount to mirror it to our local folder, so that what we create in the container
+# is also available in our host machine, so we can create a project on our host machine with help of the container.
+
+# The idea here is to use a utility container to get extra tools for create our project without to install them on our 
+# local machine, since that if it will be php, laravel, python, we won't have it in our local machine, so we want to 
+# use the utility container to get them to our local machine without having to install them on our local machine.
+# So now we even can uninstalled node and NPM on our host machine, and still create projcet with help of NPM init
+# with help of this uitility container
+
+# docker run -it -v "%cd%":/app node-util npm init
 
 
 
