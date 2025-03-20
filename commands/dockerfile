@@ -1063,9 +1063,38 @@ WORKDIR /app
 
 
 
+107. Utilizing ENTRYPOINT
+
+# We using the utility image to allow us to run npm commands. So not any commands, but restricted to npm, so for
+# example npm init for initialization, but then npm install for installing
+
+from node:14-alpine
+
+WORKDIR /app  
+
+
+# CMD [ "some command" ]
+
+# ENTRYPOINT - It's similar to the command (CMD) instruction, but it has one key difference. If we add a command
+# after the image name on docker run, for example: 'docker run -it -v "%cd%":/app node-util npm install', then it 
+# wil overwrite the command (CMD) specified in a Dockerfile if there is one. 
+# With ENTRYPOINT that's different - For the entrypoint whatever we enter in docker run, for example:
+# 'docker run -it -v "%cd%":/app node-util npm install', is appended after the entrypoint, so we can specify
+# 'npm' and now we could append any 'npm' command after our image name for example, with npm -
+#  'docker run -it -v "%cd%":/app node-util npm'
+ENTRYPOINT [ "npm" ]
 
 
 
+# docker build -t mynpm .
+
+# So with the entrypoint we just add init, not 'npm', because we have 'npm' already in the entrypoint
+# docker run -it -v "%cd%":/app mynpm init
+
+# So now we can run anny commands with 'npm', for example: '(npm) install', and it will install all the dpendencies
+# to our container and reflect to our local machine with the help of the bind mount, so the node_modules, package.json,
+# package-lock.json will be add to our local machine
+# docker run -it -v "%cd%":/app mynpm install express --save
 
 
 
