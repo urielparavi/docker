@@ -1098,4 +1098,49 @@ ENTRYPOINT [ "npm" ]
 
 
 
+108. Using Docker Compose
 
+
+# We copied the image for convenience, we haven't changed it from last time.
+from node:14-alpine
+
+WORKDIR /app  
+
+ENTRYPOINT [ "npm" ]
+
+###############################################
+
+version: '3.8'
+services:
+  # Our container
+  npm:
+    # ./ - Since we're already in the folder in which this Dockerfile can be found
+    build: ./
+    # We add this stardard input open flag and tty flag for attaching the termianl, to ensure theat if the command 
+    # needs our input we can provide our input
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app
+
+############################################### 
+
+# We run our container and create the package.json with init.
+
+# *Sidenote* - The 'npm' its the service name, so the name that we gived in the 'docker-compose.yaml', since that we 
+# already prepend this 'npm' in the Dockerfile. by the way, in this way the container will not remove.
+
+# docker-compose run npm init
+
+# docker-compose exec - To run commands in already running containers which were created by Dockerfile Compose,
+# docker-compose exec
+
+# docker compose run - Allow us to run a single service from 'docker-compose.yaml' file (In case we had multiple
+# services), here we have only one, but if we had multiple services, we could also target a single service by the 
+# service name, so in our case it's 'npm' and then with any command that sould be upended after our entrypoint of
+# our choice, for example init/install like this example.
+
+# --rm - Since with 'docker compose run' there is no up and down. A container starts, does its thing, and once the 
+# command finished it shuts down, but with 'run' it's not removed automatically
+
+# docker-compose run --rm npm init/install

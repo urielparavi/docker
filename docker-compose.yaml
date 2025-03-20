@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  # Our container
+  npm:
+    # ./ - Since we're already in the folder in which this Dockerfile can be found
+    build: ./
+    # We add this stardard input open flag and tty flag for attaching the termianl, to ensure theat if the command 
+    # needs our input we can provide our input
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app
