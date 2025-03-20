@@ -978,6 +978,48 @@ volumes:
  
 
 
+105. Different Ways of Running Commands in Containers
+
+# docker run -p 3000:80 -d --rm --name goalsapp 
+
+# We create/run container
+# -it - For interactive mode, so that it expects some input from us
+# docker run -it node 
+
+
+# We run the container in interactive mode but also in detached mode. That means we can't enter commands like this,
+# but internally this containers still is waiting for input which will keep it up an running
+# docker run -it -d node 
+
+
+# The docker exec command allow us to execute certain commands inside of a running container besides the default
+# command this container executes. So bedides the command that might've been specified in a Dockerfile. That command
+# still continues running, so the application still continues to run, but we can't run additional commands inside of
+# a container. So to use this command we execute a command against that container, and we could try running npm init
+# which creates a node project in that running node container, but 'exec' just like 'run' needs to be started in 
+# interactive mode if we want to stay connected tot that proccess we starting up here and if we want to be able to
+# provie input, and it means that we can run this command without node and npm being installed in our system, because
+# it runs inside of this container, evet that right now it's still not too useful, because it's only in the container,
+# but it's just first demo
+
+# docker exec -it priceless_rosalind npm init
+
+
+# Unlike docker exec that we can execute commands in a running container without interrupting
+# the default coomand which starts when the container starts, we also can override the default command though.
+# Now when we start the node container, the default command that is executed in the container is the node executable 
+# itself, which enters the so called Rapel, which is just an interactive mode where we can run node commands, that's
+# the default command the node will execute when we started, and if we use interactive mode we stay connected and we 
+# can then work with that interactive node input mode. Now we can override this default command by adding a new command
+# after the image name, and here we can specify npm init to overwrite the default command, which be to go into this 
+# ineractive enter some node code mode and instead execute npm init. And because we overrode the default command,
+# the container will finish thereafter and stop the container.
+
+# docker run -it node npm init 
+
+
+# *Sidenote* -  docker exec could be also useful for to read some log files which were written inside of a container
+# without interrupting the main process
 
 
 
