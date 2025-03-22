@@ -32,8 +32,12 @@ services:
       # because it won't write anything which we need to access instantly on the host machine
       # *Sidenote* - ro (read only) is not an option, because it will write some data to our disc
       - ./src:/var/www/html:delegated
-  # mysql: 
- 
+  mysql: 
+    image: mysql:5.7
+    # Our environment variables used by this mysql image to setup a database, user, password and so on.. So for more
+    # details description check on the docker hub page for this mysql image: https://hub.docker.com/_/mysql
+    env_file:
+      - ./env/mysql.env
   # compose:
   # artisan:
   # npm:

@@ -1150,3 +1150,80 @@ services:
 
 
 
+version: '3.8'
+
+services:
+  # The nginx container
+  server:
+    # We specify nginx image and we use stable-alpine tag version from docker hub, which based on very slim linux 
+    # operating system layer
+    image: 'nginx:stable-alpine'
+    ports:
+      # 80 - The port that the web server exposes to us from the internal container - from documentation:
+      #  https://hub.docker.com/_/nginx 
+      # 8000 - The port that will be exposes on our local machine
+      - '8000:80'
+    volumes:
+      # We bind (mount) the nginx.conf file from our local machine to nginx.conf in the container.
+      # etc/nginx/nginx.conf - We know that it will be in this path specifically from documentation
+      # ro - Read Only, since the container should never change the configuration there 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+
+
+      115. Adding a PHP Container
+
+
+      # We pick slim image with everything we need. 
+# php-fpm - We need this for the Nginx fonfig we're using
+FROM php:7.4-fpm-alpine
+
+# We set our root/working direcotory 
+# '/var/www/html' - This standard folder on web servers to serve our website from. 
+WORKDIR /var/www/html
+
+# We running a command for installing extra dependencies which we need
+# docker-php-ext-install - Tool that help us to install the extra dependencies and we install the pdo and pdo_mysql
+# extensions, and these are our PHP extensions which we need
+RUN docker-php-ext-install pdo pdo_mysql
+
+
+# We don't have a command (CMD) or ENTRYPOINT here, since if we don't have them, then the command (CMD) or ENTRYPOINT 
+# of the base image will be used if it has any, and this php base image will have a default command which is executed
+# which in the end is a command that invokes the PHP interpreter. So this image will automatically run this default
+# command of the base image and therefore it will be able to deal with incoming PHP files that should be interpreted,
+# because our base image is invoking this interpreter
+
+###############################################################
+
+      php:
+    build:
+      # In this build configuratin is not enough to point at the dokcer files folder, because the file in there is not
+      # named just dockerfile, instead we now need more detailed configuration, so we using context to specify the folder
+      # and then we specify the dockerfile
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      # We bind (mount) the src folder in our local machine to html folder in the container.
+      # delegated - It improve our perfomance by that if the container should wrire some data there, it's not instantly
+      # reflected back to the host machine, instead it's proccessed in batches could say, and therefore perfomance is a 
+      # bit better. So it's more for optimization, since in general this container shouldn't write frequently to this
+      # folder (var/www/html) or evet if it does, we don't need to be reflected back to the host machine instantly,
+      # because it won't write anything which we need to access instantly on the host machine
+      # *Sidenote* - ro (read only) is not an option, because it will write some data to our disc
+      - ./src:/var/www/html:delegated
+
+
+
+116. Adding a MySQL Container
+
+
+  mysql: 
+    image: mysql:5.7
+    # Our environment variables used by this mysql image to setup a database, user, password and so on.. So for more
+    # details description check on the docker hub page for this mysql image: https://hub.docker.com/_/mysql
+    env_file:
+      - ./env/mysql.env
+
+# homestead (from mysql.env) - Inital database name of a default initial database which will be created when this
+# container starts up (you can find this in the Laravel documentation)  
