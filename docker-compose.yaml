@@ -16,8 +16,24 @@ services:
       # etc/nginx/nginx.conf - We know that it will be in this path specifically from documentation
       # ro - Read Only, since the container should never change the configuration there 
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  # php:
+  php:
+    build:
+      # In this build configuratin is not enough to point at the dokcer files folder, because the file in there is not
+      # named just dockerfile, instead we now need more detailed configuration, so we using context to specify the folder
+      # and then we specify the dockerfile
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      # We bind (mount) the src folder in our local machine to html folder in the container.
+      # delegated - It improve our perfomance by that if the container should wrire some data there, it's not instantly
+      # reflected back to the host machine, instead it's proccessed in batches could say, and therefore perfomance is a 
+      # bit better. So it's more for optimization, since in general this container shouldn't write frequently to this
+      # folder (var/www/html) or evet if it does, we don't need to be reflected back to the host machine instantly,
+      # because it won't write anything which we need to access instantly on the host machine
+      # *Sidenote* - ro (read only) is not an option, because it will write some data to our disc
+      - ./src:/var/www/html:delegated
   # mysql: 
+ 
   # compose:
   # artisan:
   # npm:
