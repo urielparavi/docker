@@ -1227,3 +1227,43 @@ RUN docker-php-ext-install pdo pdo_mysql
 
 # homestead (from mysql.env) - Inital database name of a default initial database which will be created when this
 # container starts up (you can find this in the Laravel documentation)  
+
+
+
+117. Adding a Composer Utility Container
+
+
+FROM composer:latest
+
+WORKDIR /var/www/html
+
+# *Sidenote* - We need custom Dockerfile and not the default imaged, because we want to specify an entrypoint, 
+# and actually we can to it in the docker-compose file as well, but we doing it here in the Dockerfile, since it's more 
+# clear and easy to understand.
+# So the entrypoint is the composer which exists inside of this composer image and container and we install here the Laravel
+# dependencies.
+# "--ignore-platform-reqs" - This ensure that we can run this without any warnings, errors even if some dependencies
+# would be missing 
+ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
+
+
+# ENTRYPOINT - It's similar to the command (CMD) instruction, but it has one key difference. If we add a command
+# after the image name on docker run, for example: 'docker run -it -v "%cd%":/app node-util npm install', then it 
+# wil overwrite the command (CMD) specified in a Dockerfile if there is one. 
+# With ENTRYPOINT that's different - For the entrypoint whatever we enter in docker run, for example:
+# 'docker run -it -v "%cd%":/app node-util npm install', is appended after the entrypoint, so we can specify
+# 'npm' and now we could append any 'npm' command after our image name for example, with npm -
+#  'docker run -it -v "%cd%":/app node-util npm'
+
+#################################################################
+
+composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      # We bind (mount) the directory (html) in the container to our src folder in our local machine, so when we use it to 
+      # install Laravel and set up a Laravel project it does so in our source folder and it should do this in this /var/www/html
+      # internally, so when we create a Laravel apllication in this folder (/var/www/html) inside of the container, this will
+      # then be mirrored back into our source folder on the local host machine
+      - ./src:/var/www/html
