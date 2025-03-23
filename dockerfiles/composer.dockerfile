@@ -6,7 +6,7 @@ WORKDIR /var/www/html
 # and actually we can to it in the docker-compose file as well, but we doing it here in the Dockerfile, since it's more 
 # clear and easy to understand.
 # So the entrypoint is the composer which exists inside of this composer image and container and we install here the Laravel
-# dependencies.
+# his dependencies.
 # "--ignore-platform-reqs" - This ensure that we can run this without any warnings, errors even if some dependencies
 # would be missing 
 ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]

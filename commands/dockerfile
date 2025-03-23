@@ -1267,3 +1267,27 @@ composer:
       # internally, so when we create a Laravel apllication in this folder (/var/www/html) inside of the container, this will
       # then be mirrored back into our source folder on the local host machine
       - ./src:/var/www/html
+
+
+
+ 118. Creating a Laravel App via the Composer Utility Container
+
+
+  FROM composer:latest
+
+  WORKDIR /var/www/html
+
+  ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
+
+
+############################################################
+
+
+# *Sidenote* - The 'composer' its the service name, so the name that we gived in the 'docker-compose.yaml', since that 
+# we already prepend this 'composer' in the Dockerfile with the ENTRYPOINT. by the way, in this way the 
+# container will not remove by default.
+
+# So we install/set a Laravel project by running the single container (composer) from the docker-compose.yaml, and since
+# We did a bind mount from '/var/www/html' to our 'src' folder on our local machine, the project will reflected from
+# the '/var/www/html' in the container to the 'src' folder on our host machine
+# docker-compose run --rm composer create-project --prefer-dist laravel/laravel .
