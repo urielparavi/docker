@@ -6,15 +6,6 @@ services:
   # The server is our main entry point which will serve the application and which will then forward requests to the 
   # PHP interpreter for example. And the PHP interpreter will eventually indirectly talk to the MySQL database, 
   # because in our code we will connect to that.
-
-  # We set bind mount './src:/var/www/html', since our server which is the main entry point doesn't know anything about
-  # our source code (src folder). Our interpreter does, but that's not enough, the incoming request hits our server first
-  # and it only forwards requests to PHP files to the PHP interpreter. That means that these PHP files need to be exposed
-  # to the server and that simply means that we need to add an extra volume here, so this bind mount: './src:/var/www/html'.
-  # So we bind the source folder the the var/www/html folder inside the container, and we picking this folder, because
-  # in the nginx.conf it's the 'var/www/html' folder from which we're serving our content and where we're looking for files.
-  # Acutally we're looking in the public folder: 'var/www/html/public', but that is a folder which exists in the source folder,
-  # so binding src to 'var/www/html' is what we need to do to ensure that our conent is made available through that server
   server:
     # We specify nginx image and we use stable-alpine tag version from docker hub, which based on very slim linux 
     # operating system layer
@@ -25,6 +16,15 @@ services:
       # 8000 - The port that will be exposes on our local machine
       - '8000:80'
     volumes:
+      # We set bind mount './src:/var/www/html', since our server which is the main entry point doesn't know anything about
+      # our source code (src folder). Our interpreter does, but that's not enough. The incoming request hits our server first
+      # and it only forwards requests to PHP files to the PHP interpreter. That means that these PHP files need to be exposed
+      # to the server and that simply means that we need to add an extra volume here, so this bind mount: './src:/var/www/html'.
+      # So we bind the source folder the the var/www/html folder inside the container, and we picking this folder, because
+      # in the nginx.conf it's the 'var/www/html' folder from which we're serving our content and where we're looking for files.
+      # Acutally we're looking in the public folder: 'var/www/html/public', but that is a folder which exists in the 
+      # source folder, so binding src to 'var/www/html' is what we need to do to ensure that our conent is made available 
+      # through that server
       - ./src:/var/www/html
       # We bind (mount) the nginx.conf file from our local machine to nginx.conf in the container.
       # etc/nginx/nginx.conf - We know that it will be in this path specifically from documentation
@@ -72,6 +72,45 @@ services:
       # internally, so when we create a Laravel apllication in this folder (/var/www/html) inside of the container, this will
       # then be mirrored back into our source folder on the local host machine
       - ./src:/var/www/html
-  # artisan:
-  # npm:
+
+  # artisan - It's a tool which help us to run certain laravel commands, for example to populate the database with some 
+  # initial data    
+  artisan:
+    # We using the php.dockerfile, because we need the same setup as we have it in php.dockerfile, because it needs PHP to 
+    # execute code, and artisan is a Laravel command built with PHP, so it needs PHP to do that.
+    build: 
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    # It's needs a volumes, because it needs our source code, since it's executed on our source code. We do things with our 
+    # source code with that command, so we expose the source directory on our local host machine to /var/www/html folder
+    # inside the container, because that's where our application will reside  
+    volumes:
+      - ./src:/var/www/html
+    # We also set certain settings which we set in the dockerfile normally inside of a docker-compose file to essentially 
+    # override the settings inside of the dockerfile. So here we using the PHP dockerfile because we want PHP image and 
+    # we happy with the working direcotry, but we also want to add an entrypoint, and in the PHP image we don't have an 
+    # entrypoint, since the PHP container is in the end used by nginx to funnel individual files through it, so it's used
+    # like a utility container for nginx could say. So now we want to run our own command as an entrypoint.
+    # We also could create a separate dockerfile, but we can also simply add the entrypoint option here in docker-compose,
+    # and this allow us to override or add if it doesn't exist yet the entrypoint in a dockerfile.
+    # So here we want to execute 'php' - the tool, the executable set up by the PHP base image, and we wanna execute a 
+    # certain file with PHP, and that file can be found in /var/www/html/artisan (so the artisan file in the html folder).
+    # We can see this file also in the src folder, and in the end this is PHP file, but when we execute it runs a utility 
+    # program, which can do a lot of stuff and it's part of the Laravel framework. And we're executing this file inside 
+    # of the container with help of PHP and PHP image, and we're adding this entrypoint since it doesn't exist in 
+    # the php dockerfile
+    entrypoint: [ "php", "/var/www/html/artisan" ]  
+
+  # Here we demonstrate that we can add or override things in docker-compose as well like in the dockerfile,
+  # and we utilize this to set an image, working directory, entrypoint which is npm, so that we expose thie npm
+  # command from inside our image based on the node image, so we can use this npm container to run npm commands
+  # inside of it 
+  npm:
+    image: node:14
+    working_dir: /var/www/html
+    entrypoint: [ "npm" ]
+    # We set up a volumes, since we wanna bind (mount) the src to /var/www/html folder inside the container, so
+    # it will reflected on our local host machine as well
+    volumes:
+      - ./src:/var/www/html
 

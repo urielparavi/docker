@@ -1327,3 +1327,14 @@ composer:
 # docker-compose up -d --build server
 
 
+
+121. Adding More Utility Containers
+
+
+# migrate - One of the artisan command's Laravel suuport, and this will write some data to the database and it will
+# therefore also check whether this database set up works.
+# ***Sidenote*** - The original command in PHP Laravel is: 'php artisan migrate'
+# docker-compose run --rm artisan migrate
+
+# For package.json, install dependencies and so on if we want..
+# docker-compose run --rm npm init/install
