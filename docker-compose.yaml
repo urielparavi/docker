@@ -2,6 +2,19 @@ version: '3.8'
 
 services:
   # The nginx container
+
+  # The server is our main entry point which will serve the application and which will then forward requests to the 
+  # PHP interpreter for example. And the PHP interpreter will eventually indirectly talk to the MySQL database, 
+  # because in our code we will connect to that.
+
+  # We set bind mount './src:/var/www/html', since our server which is the main entry point doesn't know anything about
+  # our source code (src folder). Our interpreter does, but that's not enough, the incoming request hits our server first
+  # and it only forwards requests to PHP files to the PHP interpreter. That means that these PHP files need to be exposed
+  # to the server and that simply means that we need to add an extra volume here, so this bind mount: './src:/var/www/html'.
+  # So we bind the source folder the the var/www/html folder inside the container, and we picking this folder, because
+  # in the nginx.conf it's the 'var/www/html' folder from which we're serving our content and where we're looking for files.
+  # Acutally we're looking in the public folder: 'var/www/html/public', but that is a folder which exists in the source folder,
+  # so binding src to 'var/www/html' is what we need to do to ensure that our conent is made available through that server
   server:
     # We specify nginx image and we use stable-alpine tag version from docker hub, which based on very slim linux 
     # operating system layer
@@ -12,10 +25,18 @@ services:
       # 8000 - The port that will be exposes on our local machine
       - '8000:80'
     volumes:
+      - ./src:/var/www/html
       # We bind (mount) the nginx.conf file from our local machine to nginx.conf in the container.
       # etc/nginx/nginx.conf - We know that it will be in this path specifically from documentation
       # ro - Read Only, since the container should never change the configuration there 
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+      # We target a conf.d folder and there default.conf file (conf.d/default.conf), and that is a special file
+      # which in the end will be merged into bigger nginx config which is set up inside of the nginx image. So
+      # we should merge our own file (nginx.conf) from the local machine into that file with this bind mount
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+      - mysql  
   php:
     build:
       # In this build configuratin is not enough to point at the dokcer files folder, because the file in there is not
@@ -24,7 +45,8 @@ services:
       context: ./dockerfiles
       dockerfile: php.dockerfile
     volumes:
-      # We bind (mount) the src folder in our local machine to html folder in the container.
+      # We bind (mount) the src folder in our local machine to html folder in the container, so when we change the code 
+      # on the on our local machine in source folder, it will be reflect/change on container.
       # delegated - It improve our perfomance by that if the container should wrire some data there, it's not instantly
       # reflected back to the host machine, instead it's proccessed in batches could say, and therefore perfomance is a 
       # bit better. So it's more for optimization, since in general this container shouldn't write frequently to this
@@ -52,3 +74,4 @@ services:
       - ./src:/var/www/html
   # artisan:
   # npm:
+

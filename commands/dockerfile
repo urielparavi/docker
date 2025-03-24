@@ -1291,3 +1291,39 @@ composer:
 # We did a bind mount from '/var/www/html' to our 'src' folder on our local machine, the project will reflected from
 # the '/var/www/html' in the container to the 'src' folder on our host machine
 # docker-compose run --rm composer create-project --prefer-dist laravel/laravel .
+
+
+
+120. Launching Only Some Docker Compose Services
+
+# We set the in .env file configuration for Laravel the connction to DB for mysql Database
+
+# homestead - Inital database name of a default initial database which will be created when this
+# container starts up (you can find this in the Laravel documentation)  
+
+# DB_CONNECTION=mysql
+# DB_HOST=mysql
+# DB_PORT=3306
+# DB_DATABASE=homestead
+# DB_USERNAME=homestead
+# DB_PASSWORD=secret
+
+
+###############################################################
+
+# docker-compose --help
+
+# We run all our srvices
+# docker-compose up -d server php mysql
+
+# docker-compose down
+
+# We shortening and target only the server, since we added depends_on: - php, - mysql, so the php and mysql containers
+#  will started automatically when we run the server container
+# docker-compose up -d server
+
+# --build - So if we made a change in one or more in our images, it will rebuild the image/s that changed, but 
+# if nothing has changed, it won't rebuild it. It will just reuse these cached layers
+# docker-compose up -d --build server
+
+

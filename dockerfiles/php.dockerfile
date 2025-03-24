@@ -17,3 +17,7 @@ RUN docker-php-ext-install pdo pdo_mysql
 # which in the end is a command that invokes the PHP interpreter. So this image will automatically run this default
 # command of the base image and therefore it will be able to deal with incoming PHP files that should be interpreted,
 # because our base image is invoking this interpreter
+
+
+
+

@@ -19,3 +19,4 @@ ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
 # 'docker run -it -v "%cd%":/app node-util npm install', is appended after the entrypoint, so we can specify
 # 'npm' and now we could append any 'npm' command after our image name for example, with npm -
 #  'docker run -it -v "%cd%":/app node-util npm'
+
