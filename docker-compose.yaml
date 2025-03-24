@@ -1,11 +1,12 @@
 version: '3.8'
 
 services:
-  # The nginx container
+  # The nginx container 
 
   # The server is our main entry point which will serve the application and which will then forward requests to the 
   # PHP interpreter for example. And the PHP interpreter will eventually indirectly talk to the MySQL database, 
   # because in our code we will connect to that.
+  # Anyway, with nginx we'll also serve out the static content like images and html to the client
   server:
     # We specify nginx image and we use stable-alpine tag version from docker hub, which based on very slim linux 
     # operating system layer
@@ -16,15 +17,22 @@ services:
       # 8000 - The port that will be exposes on our local machine
       - '8000:80'
     volumes:
+      # In general, what we do here it's to set a bind mount from 'var/www/html' in the container to our src folder,
+      # so we can serve out from the nginx.conf the static content like images and html to the client that he needed. 
+      # And since we used this folder in nginx.conf '/var/www/html/public' to serve his static content, we bind the 
+      # '/var/www/html/' to our source folder in the local machine in order that all the content - images, files,
+      #  html and so on will be accessible to him and it will be preserved properly, since we already have the public
+      # folder in the src like we specify in the nginx.conf 
+
       # We set bind mount './src:/var/www/html', since our server which is the main entry point doesn't know anything about
       # our source code (src folder). Our interpreter does, but that's not enough. The incoming request hits our server first
       # and it only forwards requests to PHP files to the PHP interpreter. That means that these PHP files need to be exposed
       # to the server and that simply means that we need to add an extra volume here, so this bind mount: './src:/var/www/html'.
-      # So we bind the source folder the the var/www/html folder inside the container, and we picking this folder, because
+      # So we bind the source folder the var/www/html folder inside the container, and we picking this folder, because
       # in the nginx.conf it's the 'var/www/html' folder from which we're serving our content and where we're looking for files.
       # Acutally we're looking in the public folder: 'var/www/html/public', but that is a folder which exists in the 
       # source folder, so binding src to 'var/www/html' is what we need to do to ensure that our conent is made available 
-      # through that server
+      # through that server. 
       - ./src:/var/www/html
       # We bind (mount) the nginx.conf file from our local machine to nginx.conf in the container.
       # etc/nginx/nginx.conf - We know that it will be in this path specifically from documentation
@@ -106,6 +114,8 @@ services:
   # command from inside our image based on the node image, so we can use this npm container to run npm commands
   # inside of it 
   npm:
+    # ***Sidenote*** - We can add the instructions here in the docker-compose instead of the dockerfile, it's up to us, 
+    # but if we need to use RUN or COPY instruction, we'll need to create a dockerfile for them, since it will not work here.
     image: node:14
     working_dir: /var/www/html
     entrypoint: [ "npm" ]
