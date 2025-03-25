@@ -1338,3 +1338,12 @@ composer:
 
 # For package.json, install dependencies and so on if we want..
 # docker-compose run --rm npm init/install
+
+
+
+123. Bind Mounts and COPY: When To Use What
+
+
+# docker-compose up -d --build server
+
+# docker-compose run --rm artisan migrate
