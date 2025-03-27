@@ -1347,3 +1347,14 @@ composer:
 # docker-compose up -d --build server
 
 # docker-compose run --rm artisan migrate
+
+
+
+128. Getting Started With An Example (of deployment)
+
+
+# We building the image
+# docker build -t node-dep-example .
+
+# We run our container for testing before deployment
+# docker run -d --rm --name node-dep -p 80:80 node-dep-example
