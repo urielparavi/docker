@@ -1358,3 +1358,33 @@ composer:
 
 # We run our container for testing before deployment
 # docker run -d --rm --name node-dep -p 80:80 node-dep-example
+
+
+133. Installing Docker on a Virtual Machine
+
+# sudo - ensures the command is executed as a root user / with sufficient permissions.
+
+# This will simply ensure that all essential packages on that remote machine are updated and are using their latest version.
+# sudo yum update -y
+
+# We install docker on the remote machine on the cloud
+# sudo yum -y install docker
+
+# We start docker there, and thereafter once Docker is started, we're able to run these docker commands like docker
+# run etc..
+# sudo service docker start
+
+
+# The command sudo usermod -a -G docker ec2-user in AWS (or any Linux environment) is used to add the user ec2-user
+# to the docker group.
+# By adding the ec2-user to the docker group, this allows the user to run Docker commands (like docker run, docker ps, etc.)
+# without needing to use sudo each time. It’s a common step to configure users who need access to Docker on an EC2 instance.
+# After running this command, the user would need to log out and log back in for the changes to take effect.
+
+# sudo usermod -a -G docker ec2-user
+
+# We make sure to log out + back in after running these commands.
+# sudo systemctl enable docker
+
+# Thereafter, we can check whether Docker is available by check the version
+# docker version
