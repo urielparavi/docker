@@ -1427,3 +1427,23 @@ composer:
 # to go into this instance, because we got a running node application there, and this node application is listening
 # on port 80 which is the default HTTP port. So we add new rule and open the default HTTP port (80)
 
+
+
+137. Managing & Updating the Container / Image
+
+# We demonstrate how after we updated our code we push the updated image to our instance on our remote machine in aws.
+
+# So, since we update the code we rebuild the image again
+# docker build -t node-dep-example-1 .
+
+# We tag it appropriately, so rename it to the name that Docker Hub gived us (we used the same name from before)
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# We push the updated image to Docker Hub
+# docker push urielpa/node-example-1
+
+# We pull the updated image (the latest version) from Docker Hub to our remote machine in aws
+# docker pull urielpa/node-example-1
+
+# We run our new updated container in our remote machine
+# docker run -d --rm -p 80:80 urielpa/node-example-1
