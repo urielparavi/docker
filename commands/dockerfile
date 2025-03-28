@@ -1407,3 +1407,23 @@ composer:
 
 # And push our image 
 # docker push urielpa/node-example-1
+
+
+
+136. Running & Publishing the App (on EC2)
+
+# We run our container on the remote machine (aws)
+# docker run -d --rm -p 80:80 urielpa/node-example-1
+
+# docker ps
+
+# security group - This group basically controls which traffic is allowed on our EC2 instance
+
+# Outband rules - Rules controls which traffic is allowed from the instance to somewhere else, and in our case,
+# it's everything and this way 'docker run' worked.
+
+# Inbound rules - Rules controls which traffic is allowed from somewhere in the world to this instance, and in our
+# case by default it was only the port 22 (the SSH port) that was open. But now we needs to allow also HTTP traffic
+# to go into this instance, because we got a running node application there, and this node application is listening
+# on port 80 which is the default HTTP port. So we add new rule and open the default HTTP port (80)
+
