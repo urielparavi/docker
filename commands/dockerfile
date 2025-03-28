@@ -1388,3 +1388,22 @@ composer:
 
 # Thereafter, we can check whether Docker is available by check the version
 # docker version
+
+
+
+135. Pushing our local Image to the Cloud (Docker Hub)
+
+
+# We build our image locally before 
+# docker build -t node-dep-example-1 .
+
+# We rename our image with docker tag command before we push it to Docker Hub, and we give a new tag to this image,
+# so we can run docker tag and then use this image name 'node-dep-example-1', and then use 'urielpa/node-example-1'
+# as a new name that we got from our repository Docker Hub (with without a tagname)
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# We login before to authenticated
+# docker login
+
+# And push our image 
+# docker push urielpa/node-example-1
