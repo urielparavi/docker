@@ -1456,6 +1456,19 @@ composer:
 
 
 
+141. Deploying with AWS ECS: A Managed Docker Container Service
+
+# Instructions to deploy container with ECS
+
+# 1) Create cluster
+
+# 2) Create Task definitions
+
+# 3) Create Services  
+
+# 4) Allow the security group in services on Inbound rules the HTTP 80 to anywhere
+
+
 
 
 
