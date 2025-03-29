@@ -1470,6 +1470,38 @@ composer:
 
 
 
+143. Updating Managed Containers
 
+
+# Instructions update container in ECS
+
+
+# So, we update our image first...
+
+# docker build -t node-dep-example-1 .
+
+# We tag it with the same name from before
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# docker login
+
+# docker push urielpa/node-example-1
+
+
+# The first way:
+
+# 1) on Task definition in our Task, we press on the 'Deoloy' button and choose 'update service'
+
+# 2) Then we mark the 'Force new deployment' and press update at the bottom of the page
+
+
+# The second way: 
+
+# 1) on Task definition in our Task, we press on the 'create new revision' keep all settings and press 'create'
+
+# at the bottom of the page
+
+# 2) Then, on Task definition in our Task press the 'Deoloy' button and choose 'update service' keep all the settings 
+# and press at the button of the page 'update'
 
 
