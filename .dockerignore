@@ -2,3 +2,4 @@ node_modules
 commands
 Dockerfile
 .git
+*.pem

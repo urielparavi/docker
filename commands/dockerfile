@@ -975,7 +975,18 @@ volumes:
 # If we want to build any custom images defined in a docker-compose file. So if we just want to build images without
 # starting a container thereafter, we could trigger this by running 'docker-compose file build'
 # docker-compose build
+
+
+
+144. Preparing a Multi-Container App
+
+
+# docker build -t goals-node ./backend
  
+
+# docker tag goals-node urielpa/goals-node
+
+# docker push urielpa/goals-node
 
 
 
