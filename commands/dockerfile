@@ -975,17 +975,546 @@ volumes:
 # If we want to build any custom images defined in a docker-compose file. So if we just want to build images without
 # starting a container thereafter, we could trigger this by running 'docker-compose file build'
 # docker-compose build
+ 
+
+
+105. Different Ways of Running Commands in Containers
+
+# docker run -p 3000:80 -d --rm --name goalsapp 
+
+# We create/run container
+# -it - For interactive mode, so that it expects some input from us
+# docker run -it node 
+
+
+# We run the container in interactive mode but also in detached mode. That means we can't enter commands like this,
+# but internally this containers still is waiting for input which will keep it up an running
+# docker run -it -d node 
+
+
+# The docker exec command allow us to execute certain commands inside of a running container besides the default
+# command this container executes. So bedides the command that might've been specified in a Dockerfile. That command
+# still continues running, so the application still continues to run, but we can't run additional commands inside of
+# a container. So to use this command we execute a command against that container, and we could try running npm init
+# which creates a node project in that running node container, but 'exec' just like 'run' needs to be started in 
+# interactive mode if we want to stay connected tot that proccess we starting up here and if we want to be able to
+# provie input, and it means that we can run this command without node and npm being installed in our system, because
+# it runs inside of this container, evet that right now it's still not too useful, because it's only in the container,
+# but it's just first demo
+
+# In short words here we are adding a command to the container but it will still run
+# docker exec -it priceless_rosalind npm init
+
+
+# Unlike docker exec that we can execute commands in a running container without interrupting
+# the default coomand which starts when the container starts, we also can override the default command though.
+# Now when we start the node container, the default command that is executed in the container is the node executable 
+# itself, which enters the so called Rapel, which is just an interactive mode where we can run node commands, that's
+# the default command the node will execute when we started, and if we use interactive mode we stay connected and we 
+# can then work with that interactive node input mode. Now we can override this default command by adding a new command
+# after the image name, and here we can specify npm init to overwrite the default command, which be to go into this 
+# ineractive enter some node code mode and instead execute npm init. And because we overrode the default command,
+# the container will finish thereafter and stop the container.
+
+# In short words here override the default command (run -it node), so it will do the command (npm init) and stop ongoing 
+# the connection, so the container will stop
+# docker run -it node npm init 
+
+
+# *Sidenote* - docker exec could be also useful for to read some log files which were written inside of a container
+# without interrupting the main process
+
+
+
+106. Building a First Utility Container
+
+
+# We creating the utility container with extra slim operating system layer, so it will be smaller node image,
+# since right now we only need the package.json
+from node:14-alpine
+
+# We adding the working/root directory and set this to app, to define which folder will be used by commands executed
+# on this container and on this image, and that includes commands we enter with 'docker run'
+WORKDIR /app    
+
+
+# We don't use it because we want that our project more flexible, we don't want to restrict the image to just be able
+# to run the init command, we want to give the user full control over his image
+# CMD npm init
+
+
+# We create this node-util image
+# docker build -t node-util . 
+
+
+# '-it' - We need to do this with interactvie mode (with the open connection input and attaching the termianl) to stay
+# connected and to be able to enter values.
+
+# -v "%cd%":/app - We set this bind mount to mirror it to our local folder, so that what we create in the container
+# is also available in our host machine, so we can create a project on our host machine with help of the container.
+
+# The idea here is to use a utility container to get extra tools for create our project without to install them on our 
+# local machine, since that if it will be php, laravel, python, we won't have it in our local machine, so we want to 
+# use the utility container to get them to our local machine without having to install them on our local machine.
+# So now we even can uninstalled node and NPM on our host machine, and still create projcet with help of NPM init
+# with help of this uitility container
+
+# docker run -it -v "%cd%":/app node-util npm init
+
+
+
+107. Utilizing ENTRYPOINT
+
+# We using the utility image to allow us to run npm commands. So not any commands, but restricted to npm, so for
+# example npm init for initialization, but then npm install for installing
+
+from node:14-alpine
+
+WORKDIR /app  
+
+
+# CMD [ "some command" ]
+
+# ENTRYPOINT - It's similar to the command (CMD) instruction, but it has one key difference. If we add a command
+# after the image name on docker run, for example: 'docker run -it -v "%cd%":/app node-util npm install', then it 
+# wil overwrite the command (CMD) specified in a Dockerfile if there is one. 
+# With ENTRYPOINT that's different - For the entrypoint whatever we enter in docker run, for example:
+# 'docker run -it -v "%cd%":/app node-util npm install', is appended after the entrypoint, so we can specify
+# 'npm' and now we could append any 'npm' command after our image name for example, with npm -
+#  'docker run -it -v "%cd%":/app node-util npm'
+ENTRYPOINT [ "npm" ]
+
+
+
+# docker build -t mynpm .
+
+# So with the entrypoint we just add init, not 'npm', because we have 'npm' already in the entrypoint
+# docker run -it -v "%cd%":/app mynpm init
+
+# So now we can run anny commands with 'npm', for example: '(npm) install', and it will install all the dpendencies
+# to our container and reflect to our local machine with the help of the bind mount, so the node_modules, package.json,
+# package-lock.json will be add to our local machine
+# docker run -it -v "%cd%":/app mynpm install express --save
+
+
+
+108. Using Docker Compose
+
+
+# We copied the image for convenience, we haven't changed it from last time.
+from node:14-alpine
+
+WORKDIR /app  
+
+ENTRYPOINT [ "npm" ]
+
+###############################################
+
+version: '3.8'
+services:
+  # Our container
+  npm:
+    # ./ - Since we're already in the folder in which this Dockerfile can be found
+    build: ./
+    # We add this stardard input open flag and tty flag for attaching the termianl, to ensure theat if the command 
+    # needs our input we can provide our input
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app
+
+############################################### 
+
+# We run our container and create the package.json with init.
+
+# *Sidenote* - The 'npm' its the service name, so the name that we gived in the 'docker-compose.yaml', since that we 
+# already prepend this 'npm' in the Dockerfile. by the way, in this way the container will not remove.
+
+# docker-compose run npm init
+
+# docker-compose exec - To run commands in already running containers which were created by Dockerfile Compose,
+# docker-compose exec
+
+# docker compose run - Allow us to run a single service from 'docker-compose.yaml' file (In case we had multiple
+# services), here we have only one, but if we had multiple services, we could also target a single service by the 
+# service name, so in our case it's 'npm' and then with any command that sould be upended after our entrypoint of
+# our choice, for example init/install like this example.
+
+# --rm - Since with 'docker compose run' there is no up and down. A container starts, does its thing, and once the 
+# command finished it shuts down, but with 'run' it's not removed automatically
+
+# docker-compose run --rm npm init/install
+
+
+114. Adding a Nginx (Web Server) Container
+
+
+
+version: '3.8'
+
+services:
+  # The nginx container
+  server:
+    # We specify nginx image and we use stable-alpine tag version from docker hub, which based on very slim linux 
+    # operating system layer
+    image: 'nginx:stable-alpine'
+    ports:
+      # 80 - The port that the web server exposes to us from the internal container - from documentation:
+      #  https://hub.docker.com/_/nginx 
+      # 8000 - The port that will be exposes on our local machine
+      - '8000:80'
+    volumes:
+      # We bind (mount) the nginx.conf file from our local machine to nginx.conf in the container.
+      # etc/nginx/nginx.conf - We know that it will be in this path specifically from documentation
+      # ro - Read Only, since the container should never change the configuration there 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+
+
+      115. Adding a PHP Container
+
+
+      # We pick slim image with everything we need. 
+# php-fpm - We need this for the Nginx fonfig we're using
+FROM php:7.4-fpm-alpine
+
+# We set our root/working direcotory 
+# '/var/www/html' - This standard folder on web servers to serve our website from. 
+WORKDIR /var/www/html
+
+# We running a command for installing extra dependencies which we need
+# docker-php-ext-install - Tool that help us to install the extra dependencies and we install the pdo and pdo_mysql
+# extensions, and these are our PHP extensions which we need
+RUN docker-php-ext-install pdo pdo_mysql
+
+
+# We don't have a command (CMD) or ENTRYPOINT here, since if we don't have them, then the command (CMD) or ENTRYPOINT 
+# of the base image will be used if it has any, and this php base image will have a default command which is executed
+# which in the end is a command that invokes the PHP interpreter. So this image will automatically run this default
+# command of the base image and therefore it will be able to deal with incoming PHP files that should be interpreted,
+# because our base image is invoking this interpreter
+
+###############################################################
+
+      php:
+    build:
+      # In this build configuratin is not enough to point at the dokcer files folder, because the file in there is not
+      # named just dockerfile, instead we now need more detailed configuration, so we using context to specify the folder
+      # and then we specify the dockerfile
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      # We bind (mount) the src folder in our local machine to html folder in the container.
+      # delegated - It improve our perfomance by that if the container should wrire some data there, it's not instantly
+      # reflected back to the host machine, instead it's proccessed in batches could say, and therefore perfomance is a 
+      # bit better. So it's more for optimization, since in general this container shouldn't write frequently to this
+      # folder (var/www/html) or evet if it does, we don't need to be reflected back to the host machine instantly,
+      # because it won't write anything which we need to access instantly on the host machine
+      # *Sidenote* - ro (read only) is not an option, because it will write some data to our disc
+      - ./src:/var/www/html:delegated
+
+
+
+116. Adding a MySQL Container
+
+
+  mysql: 
+    image: mysql:5.7
+    # Our environment variables used by this mysql image to setup a database, user, password and so on.. So for more
+    # details description check on the docker hub page for this mysql image: https://hub.docker.com/_/mysql
+    env_file:
+      - ./env/mysql.env
+
+# homestead (from mysql.env) - Inital database name of a default initial database which will be created when this
+# container starts up (you can find this in the Laravel documentation)  
+
+
+
+117. Adding a Composer Utility Container
+
+
+FROM composer:latest
+
+WORKDIR /var/www/html
+
+# *Sidenote* - We need custom Dockerfile and not the default imaged, because we want to specify an entrypoint, 
+# and actually we can to it in the docker-compose file as well, but we doing it here in the Dockerfile, since it's more 
+# clear and easy to understand.
+# So the entrypoint is the composer which exists inside of this composer image and container and we install here the Laravel
+# dependencies.
+# "--ignore-platform-reqs" - This ensure that we can run this without any warnings, errors even if some dependencies
+# would be missing 
+ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
+
+
+# ENTRYPOINT - It's similar to the command (CMD) instruction, but it has one key difference. If we add a command
+# after the image name on docker run, for example: 'docker run -it -v "%cd%":/app node-util npm install', then it 
+# wil overwrite the command (CMD) specified in a Dockerfile if there is one. 
+# With ENTRYPOINT that's different - For the entrypoint whatever we enter in docker run, for example:
+# 'docker run -it -v "%cd%":/app node-util npm install', is appended after the entrypoint, so we can specify
+# 'npm' and now we could append any 'npm' command after our image name for example, with npm -
+#  'docker run -it -v "%cd%":/app node-util npm'
+
+#################################################################
+
+composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      # We bind (mount) the directory (html) in the container to our src folder in our local machine, so when we use it to 
+      # install Laravel and set up a Laravel project it does so in our source folder and it should do this in this /var/www/html
+      # internally, so when we create a Laravel apllication in this folder (/var/www/html) inside of the container, this will
+      # then be mirrored back into our source folder on the local host machine
+      - ./src:/var/www/html
+
+
+
+ 118. Creating a Laravel App via the Composer Utility Container
+
+
+  FROM composer:latest
+
+  WORKDIR /var/www/html
+
+  ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
+
+
+############################################################
+
+
+# *Sidenote* - The 'composer' its the service name, so the name that we gived in the 'docker-compose.yaml', since that 
+# we already prepend this 'composer' in the Dockerfile with the ENTRYPOINT. by the way, in this way the 
+# container will not remove by default.
+
+# So we install/set a Laravel project by running the single container (composer) from the docker-compose.yaml, and since
+# We did a bind mount from '/var/www/html' to our 'src' folder on our local machine, the project will reflected from
+# the '/var/www/html' in the container to the 'src' folder on our host machine
+# docker-compose run --rm composer create-project --prefer-dist laravel/laravel .
+
+
+
+120. Launching Only Some Docker Compose Services
+
+# We set the in .env file configuration for Laravel the connction to DB for mysql Database
+
+# homestead - Inital database name of a default initial database which will be created when this
+# container starts up (you can find this in the Laravel documentation)  
+
+# DB_CONNECTION=mysql
+# DB_HOST=mysql
+# DB_PORT=3306
+# DB_DATABASE=homestead
+# DB_USERNAME=homestead
+# DB_PASSWORD=secret
+
+
+###############################################################
+
+# docker-compose --help
+
+# We run all our srvices
+# docker-compose up -d server php mysql
+
+# docker-compose down
+
+# We shortening and target only the server, since we added depends_on: - php, - mysql, so the php and mysql containers
+#  will started automatically when we run the server container
+# docker-compose up -d server
+
+# --build - So if we made a change in one or more in our images, it will rebuild the image/s that changed, but 
+# if nothing has changed, it won't rebuild it. It will just reuse these cached layers
+# docker-compose up -d --build server
+
+
+
+121. Adding More Utility Containers
+
+
+# migrate - One of the artisan command's Laravel suuport, and this will write some data to the database and it will
+# therefore also check whether this database set up works.
+# ***Sidenote*** - The original command in PHP Laravel is: 'php artisan migrate'
+# docker-compose run --rm artisan migrate
+
+# For package.json, install dependencies and so on if we want..
+# docker-compose run --rm npm init/install
+
+
+
+123. Bind Mounts and COPY: When To Use What
+
+
+# docker-compose up -d --build server
+
+# docker-compose run --rm artisan migrate
+
+
+
+128. Getting Started With An Example (of deployment)
+
+
+# We building the image
+# docker build -t node-dep-example .
+
+# We run our container for testing before deployment
+# docker run -d --rm --name node-dep -p 80:80 node-dep-example
+
+
+133. Installing Docker on a Virtual Machine
+
+# sudo - ensures the command is executed as a root user / with sufficient permissions.
+
+# This will simply ensure that all essential packages on that remote machine are updated and are using their latest version.
+# sudo yum update -y
+
+# We install docker on the remote machine on the cloud
+# sudo yum -y install docker
+
+# We start docker there, and thereafter once Docker is started, we're able to run these docker commands like docker
+# run etc..
+# sudo service docker start
+
+
+# The command sudo usermod -a -G docker ec2-user in AWS (or any Linux environment) is used to add the user ec2-user
+# to the docker group.
+# By adding the ec2-user to the docker group, this allows the user to run Docker commands (like docker run, docker ps, etc.)
+# without needing to use sudo each time. It’s a common step to configure users who need access to Docker on an EC2 instance.
+# After running this command, the user would need to log out and log back in for the changes to take effect.
+
+# sudo usermod -a -G docker ec2-user
+
+# We make sure to log out + back in after running these commands.
+# sudo systemctl enable docker
+
+# Thereafter, we can check whether Docker is available by check the version
+# docker version
+
+
+
+135. Pushing our local Image to the Cloud (Docker Hub)
+
+
+# We build our image locally before 
+# docker build -t node-dep-example-1 .
+
+# We rename our image with docker tag command before we push it to Docker Hub, and we give a new tag to this image,
+# so we can run docker tag and then use this image name 'node-dep-example-1', and then use 'urielpa/node-example-1'
+# as a new name that we got from our repository Docker Hub (with without a tagname)
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# We login before to authenticated
+# docker login
+
+# And push our image 
+# docker push urielpa/node-example-1
+
+
+
+136. Running & Publishing the App (on EC2)
+
+# We run our container on the remote machine (aws)
+# docker run -d --rm -p 80:80 urielpa/node-example-1
+
+# docker ps
+
+# security group - This group basically controls which traffic is allowed on our EC2 instance
+
+# Outband rules - Rules controls which traffic is allowed from the instance to somewhere else, and in our case,
+# it's everything and this way 'docker run' worked.
+
+# Inbound rules - Rules controls which traffic is allowed from somewhere in the world to this instance, and in our
+# case by default it was only the port 22 (the SSH port) that was open. But now we needs to allow also HTTP traffic
+# to go into this instance, because we got a running node application there, and this node application is listening
+# on port 80 which is the default HTTP port. So we add new rule and open the default HTTP port (80)
+
+
+
+137. Managing & Updating the Container / Image
+
+# We demonstrate how after we updated our code we push the updated image to our instance on our remote machine in aws.
+
+# So, since we update the code we rebuild the image again
+# docker build -t node-dep-example-1 .
+
+# We tag it appropriately, so rename it to the name that we chosen in Docker Hub (we used the same name from before)
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# We push the updated image to Docker Hub
+# docker push urielpa/node-example-1
+
+# We pull the updated image (the latest version) from Docker Hub to our remote machine in aws
+# docker pull urielpa/node-example-1
+
+# We run our new updated container in our remote machine
+# docker run -d --rm -p 80:80 urielpa/node-example-1
+
+
+
+138. Disadvantages of our Current Approach
+
+# We don't do anything here...
+
+
+
+141. Deploying with AWS ECS: A Managed Docker Container Service
+
+# Instructions to deploy container with ECS
+
+# 1) Create cluster
+
+# 2) Create Task definitions
+
+# 3) Create Services  
+
+# 4) Allow the security group in services on Inbound rules the HTTP 80 to anywhere
+
+
+
+143. Updating Managed Containers
+
+
+# Instructions update container in ECS
+
+
+# So, we update our image first...
+
+# docker build -t node-dep-example-1 .
+
+# We tag it with the same name from before
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# docker login
+
+# docker push urielpa/node-example-1
+
+
+# The first way:
+
+# 1) on Task definition in our Task, we press on the 'Deoloy' button and choose 'update service'
+
+# 2) Then we mark the 'Force new deployment' and press update at the bottom of the page
+
+
+# The second way: 
+
+# 1) on Task definition in our Task, we press on the 'create new revision' keep all settings and press 'create'
+
+# at the bottom of the page
+
+# 2) Then, on Task definition in our Task press the 'Deoloy' button and choose 'update service' keep all the settings 
+# and press at the button of the page 'update'
 
 
 
 144. Preparing a Multi-Container App
 
-
+# We build the image after our changes
 # docker build -t goals-node ./backend
  
-
+# We tag it appropriately, so rename it to the name that we chosen in Docker Hub 
 # docker tag goals-node urielpa/goals-node
 
+# We push it to Docker Hub
 # docker push urielpa/goals-node
 
 
