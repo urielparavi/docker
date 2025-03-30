@@ -1519,6 +1519,12 @@ composer:
 
 
 
+145. Configuring the NodeJS Backend Container
+
+# We configured cluster and Task definitions on ECS service with the our image - goals-node
+
+
+
 
 
 
