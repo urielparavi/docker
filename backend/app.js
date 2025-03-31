@@ -4,18 +4,10 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
 
 const Goal = require('./models/goal');
 
 const app = express();
-
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, 'logs', 'access.log'),
-  { flags: 'a' }
-);
-
-app.use(morgan('combined', { stream: accessLogStream }));
 
 app.use(bodyParser.json());
 
@@ -27,7 +19,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/goals', async (req, res) => {
-  console.log('TRYING TO FETCH GOALS');
+  console.log('TRYING TO FETCH GOALS!');
   try {
     const goals = await Goal.find();
     res.status(200).json({
@@ -84,23 +76,18 @@ app.delete('/goals/:id', async (req, res) => {
 });
 
 mongoose.connect(
-  // 'mongodb://localhost:27017/course-goals',
-  // 'mongodb://host.docker.internal:27017/course-goals',
-  // 'mongodb://mongodb:27017/course-goals',
-  // For to get access to communicate with the MongoDB container DB, we needed to added this with this format
-  // which understood by Mongo DB
-  // 'mongodb://uriel:secret@mongodb:27017/course-goals?authSource=admin',
   `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_URL}:27017/course-goals?authSource=admin`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+	family: 4
   },
   (err) => {
     if (err) {
       console.error('FAILED TO CONNECT TO MONGODB');
       console.error(err);
     } else {
-      console.log('CONNECTED TO MONGODB');
+      console.log('CONNECTED TO MONGODB!!');
       app.listen(80);
     }
   }

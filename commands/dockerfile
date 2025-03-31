@@ -1525,6 +1525,22 @@ composer:
 
 
 
+146. Deploying a Second Container & A Load Balancer
+
+# 1) We created a cluster
+
+# 2) We created a load balancer and added a tag
+
+# 3)  We created a VPC
+
+# 4) We enabled the security group to anyone
+
+# 5) We created a Task definitions with 2 containers - mongodb and backend-goals
+
+# 6) We created a service for them
+
+
+
 
 
 
