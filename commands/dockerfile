@@ -1553,6 +1553,22 @@ composer:
 
 
 
+148. Using EFS Volumes with ECS
+
+
+#  *Here we added a volume for that our data will not lost when we remove/update a container*
+
+# 1) We created security group and on inbound rules we add rule with type NFS, port 2049, with our last security group
+
+# 2) We created customized EFS - Elastic File System and added our new security group to it
+
+# 3) We created a volume and mint point on our last Task definition, so we created a new revision added the volume
+# and the mount point for our container mongodb
+
+# 4) We update our service/Force new deployment
+
+
+
 
 
 
