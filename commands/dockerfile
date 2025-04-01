@@ -1569,6 +1569,17 @@ composer:
 
 
 
+151. Moving to MongoDB Atlas
+
+# *We conected to the mongo db atlas*
+
+# We rebuild the image again because we change the environement variables and runing our container and connect to MongoDB Atlas
+# docker-compose up
+
+# docker-compose down
+
+
+
 
 
 
