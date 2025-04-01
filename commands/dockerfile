@@ -1541,6 +1541,19 @@ composer:
 
 
 
+147. Using a Load Balancer for a Stable Domain
+
+# *Here we fixed our Load Balancer and the security group*
+
+# Load Balancer - This will ensure that incoming traffic is handled in an efficient way, but it will also help us
+# with assigning a custom domain later if we want to.
+
+# Application Load Balancer - Allow  containers to use dynamic host port mapping (multiple tasks allowed per container
+# instance). Multiple services can use the same listener port on a single load balancer with rule-based routing and paths
+
+
+
+
 
 
 
