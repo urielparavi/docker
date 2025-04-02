@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/goals', async (req, res) => {
-  console.log('TRYING TO FETCH GOALS!!');
+  console.log('TRYING TO FETCH GOALS!');
   try {
     const goals = await Goal.find();
     res.status(200).json({
@@ -80,7 +80,6 @@ mongoose.connect(
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-	family: 4
   },
   (err) => {
     if (err) {
