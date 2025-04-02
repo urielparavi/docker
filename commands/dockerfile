@@ -1579,6 +1579,18 @@ composer:
 # docker-compose down
 
 
+152. Using MongoDB Atlas in Production
+
+# We rebuilded the image since we updated our URL to connect to the MongoDB Atalas 
+# docker build -t urielpa/goals-node ./backend
+
+# docker login
+
+# docker push urielpa/goals-node
+
+
+
+
 
 
 
