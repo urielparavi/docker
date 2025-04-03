@@ -1596,6 +1596,65 @@ composer:
 
 
 
+156. Introducing Multi-Stage Builds
+
+# Multi-Stage builds allow you to have one Dockerfile, that define multiple build steps or setup steps, so called "stages" 
+# inside of that file. Stages can copy results from each other, so we can have one stage to create the optimized files and 
+# another stage to serve them. We can either build the entire Dockerfile going through all stages, step by step from top to 
+# bottom or we select individual stages up to which we wanna build, skipping all stages that would come after them that are 
+# multi-stage builds and multi-stage Dockerfiles.
+
+##########################################################
+
+# Dockerfile:
+
+# The first stage
+# as build - Special instruction could say after every FROM instruction that we could name it any name of our choice,
+# and it will hold the final content of this build stage,  so we can use it in different stage in our Dockerfile
+FROM node:14-alpine as build
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+
+# The second stage
+# We switch to a different base image - nginx, to start our server with the optimized code from the first stage.
+# So, in general we could have many stage, but in our case, our final container from the second stage, will only include 
+# that second stage, but it will first of all build this first stage to derive this final stage 
+# nginx:stable-alpine - Very slim nginx version 
+FROM nginx:stable-alpine
+
+# We use the optimized files from our first stage and serve them to the nginx contianer.
+# "--from" - from some stage in this Dockerfile
+# build - the name of the stage we wanna copy
+# We copy from the build stage - his final content by using "--from=body"
+# /app/build - So we copy from the build stage the build folder that we created with "npm run build" in the app folder in our
+# container, to the "/usr/share/nginx/html" in our nginx image/container
+# "/usr/share/nginx/html" - The default folder from where nginx will serve files, so static content - JS, CSS, HTML.
+# For more details, check on the documentation of nginx: https://hub.docker.com/_/nginx 
+COPY --from=build /app/build /usr/share/nginx/html
+
+# port 80 - the default port that nginx exposes internally, we we expose it here as well 
+EXPOSE 80
+
+# The final command that start our nginx server.
+# "-g", "daemon off;" - from the documentation
+CMD ["nginx", "-g", "daemon off;"]
+
+
+
+
+
+
+
+
 
 
 
