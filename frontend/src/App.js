@@ -44,6 +44,9 @@ function App() {
     setIsLoading(true);
 
     try {
+      // We send to goals and not "localhost", since this frontend container we'll connect to the backend container through the
+      // browser from the local machine of the user, so we can't use "localhost" like before with the backend container and the
+      // mongodb container when they were talked with each other from container to container
       const response = await fetch(backendUrl + '/goals', {
         method: 'POST',
         body: JSON.stringify({

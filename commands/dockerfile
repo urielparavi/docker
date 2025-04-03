@@ -1650,7 +1650,15 @@ CMD ["nginx", "-g", "daemon off;"]
 
 
 
+157. Building a Multi-Stage Image
 
+# We re-build the image since we change our code and specify the path of the file and place where the image should be build
+# -f - Allow us to specify the Dockerfile name and we should give the full path
+# ./frontend - The place where image we'll build like the "context" in the docker-compose.yaml
+# docker build -f frontend/Dockerfile.prod -t urielpa/goals-react ./frontend
+
+# We pushed it to Docker Hub
+# docker push urielpa/goals-react
 
 
 
