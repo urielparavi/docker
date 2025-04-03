@@ -604,7 +604,7 @@ CMD [ "node", "app.js" ]
 84. MOVING THE REACT SPA INTO A CONTAINER
 
 # From node => Since the frontend setup depends on Node. it's not Node application, but it uses Node to spin up the
-# development server which serves this React application, and also Node is also used to optimize the React code which 
+# development server which serves this React application, and also Node used to optimize the React code which 
 # we write, and to transorm it into code the browser understands 
 FROM node
 
@@ -1590,7 +1590,9 @@ composer:
 
 
 
+155. Creating a "build-only" Container
 
+# ...
 
 
 
