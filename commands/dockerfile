@@ -1680,10 +1680,46 @@ CMD ["nginx", "-g", "daemon off;"]
 159. Development vs Production: Differences
 
 
+#... 
 
 
 
+160. Understanding Multi-Stage Build Targets
 
+
+# The first stage
+# as build - Special instruction could say after every FROM instruction that we could name it any name of our choice,
+# and it will hold the final content of this build stage,  so we can use it in different stage in our Dockerfile
+FROM node:14-alpine as build
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+
+FROM nginx:stable-alpine
+
+COPY --from=build /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+
+##########################################################
+
+# Here we build the 'build' stage and it will stop after, so it will not build the nginx image. 
+# So if for example we have a Dockerfile with multiple stages and one for testing and the other is for running the
+# server, we can just only run up to the tests, and sometimes we would wanna to only run up to the server.
+# With --target flag we can build stages by their name, so here we target the 'build' stage from our Dockerfile.prod,
+# and this would cause the image build proceess to stop after this stage was processed
+
+# docker build --target build -f frontend/Dockerfile.prod ./frontend
 
 
 
