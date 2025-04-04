@@ -1661,6 +1661,21 @@ CMD ["nginx", "-g", "daemon off;"]
 # docker push urielpa/goals-react
 
 
+158. Deploying a Standalone Frontend App
+
+# So the frontend container and the backend container are sperated - each of them will be in different task
+# on port 80 and they communicate with different and unchangeable url/domains
+
+# We created a Load Balancer for the frontend (react) application that could get the incoming requests,
+# since they we'll be in a separate task 
+
+# We created target group for the Load Balancer
+
+# We created a new task for the frontend container
+
+# We created a new service for the frontend (react) application 
+
+
 
 
 
