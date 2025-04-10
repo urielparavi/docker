@@ -1723,3 +1723,78 @@ CMD ["nginx", "-g", "daemon off;"]
 
 
 
+************************KUBERNETES***********************
+
+
+
+189. A First Deployment - Using the Imperative Approach
+
+# We build the image
+# docker build -t kub-first-app .
+
+# To check commands etc..
+# kubectl help
+
+
+# We created the image on our local machine to demonstrate that in the cluster it will not be available since it's 
+# another machine - docker's virtual machine
+# kubectl create deployment first-app --image=kub-first-app
+
+# So now we have 0 deployments
+# kubectl get deployments
+
+# And 0 pods
+# kubectl get pods
+
+# So we delete our deployment
+# kubectl delete deployment first-app
+
+# Now we created repo on Docker Hub, so we taged it on the name of the repo and the image that we specified on Docker Hub
+# docker tag kub-first-app urielpa/kub-first-app
+
+# We pushed it to Docker Hub
+# docker push urielpa/kub-first-app
+
+# And now we created new deployment object, since the image stored on the Docke Hub, so it will be available on the cluster
+# kubectl create deployment first-app --image=urielpa/kub-first-app
+
+
+# ***Access in to the kubernetes dashboard***
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+
+
+192. Exposing a Deployment with a Service
+
+
+# kubectl create --help
+
+# We exposing our app in the cluster with type of LoadBalancer and in port 8080
+# ClusterIP - The default ip of our pod, but it our app will not be accessible from outside the cluster
+# NodePort - with it we will get unchangeable ip and also it will be accessible from outside wolrd
+# LoadBalancer - with it we will get unchangeable ip and also it will be accessible from outside wolrd, but it would also
+# distribute incoming traffic across all pods which part of this service
+# kubectl expose deployment first-app --type=LoadBalancer --port=8080
+
+# So here we used in NodePort, so we changed it with regular expression to LoadBalancer
+# kubectl patch svc first-app --type=json -p "[{\"op\": \"replace\", \"path\": \"/spec/type\", \"value\": \"LoadBalancer\"}]"
+# service/first-app patched
+
+# Here we exposing our app to the port 8080 in the local machine, so our port of our app in the cluster internally is 8080
+# and also outside in the local machine, so in other words we forwards a port from our local machine to a Kubernetes service
+# inside the cluster. So in this we'll use on existing pod/s
+# kubectl port-forward svc/first-app 8080:8080
+
+# The url of our runing app
+# http://localhost:8080, or: http://127.0.0.1:8080
+
+# Here we get all our services
+# kubectl get services
+
+# Here we get our specific service
+# kubectl get service first-app
