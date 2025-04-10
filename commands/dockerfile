@@ -1764,6 +1764,11 @@ CMD ["nginx", "-g", "daemon off;"]
 # We create the token for sign in to the dashboard
 # kubectl create token dashboard-sa -n kubernetes-dashboard
 
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
 # And open it in this URL
 # Open on: https://localhost:8443
 
@@ -1798,3 +1803,25 @@ CMD ["nginx", "-g", "daemon off;"]
 
 # Here we get our specific service
 # kubectl get service first-app
+
+
+
+193. Restarting Containers
+
+# kubectl get pods
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+# Here we demonstrate that since we have an error on error route which will actually crash the node app, we see that
+# kubernetes will restart this pod again, and in each time that it happening again, it will restart and runing it
+# after longer time from before, to prevent infinite loop in case this container fail all the time
+

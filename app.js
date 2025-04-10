@@ -10,6 +10,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/error', (req, res) => {
+  // This command will stop immediately the node server
   process.exit(1);
 });
 
