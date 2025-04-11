@@ -1843,3 +1843,53 @@ CMD ["nginx", "-g", "daemon off;"]
 # We returned our state to one pod
 # kubectl scale deployment/first-app --replicas=1
 
+
+
+195. Updating Deployments
+
+# We build the image after we changed the code
+# docker build -t urielpa/kub-first-app .
+
+# We check if our deployment still there
+# kubectl get deployments
+
+
+# ***We access to kubernetes dashboard***
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+# We push it to Docker Hub
+# docker push urielpa/kub-first-app
+
+# We demonstrate that if we want to update deployment, we need to change the name of the image on Docker Hub or
+# adding/change/rename the tag of the image, since kubernetes only re-downloade the image with different name,
+# so this updateing will fail
+
+# We tell kubernetes that we want to update image on the deployment object with the name 'first-app', and we want to
+# update the container with the name 'kub-first-app' to the image that we update on Docker Hub 'urielpa/kub-first-app'
+# kubectl set image deployment/first-app kub-first-app=urielpa/kub-first-app
+
+# The url of our app on the local machine
+# http://localhost:8080
+
+# So we build the image again and adding a tag
+# docker build -t urielpa/kub-first-app:2 .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-first-app:2
+
+# We update our image in the deployment with the new tag
+# kubectl set image deployment/first-app kub-first-app=urielpa/kub-first-app:2
+
+# If we want to see if our deployment update, we can check it with 'kubectl rollout status' and the name of the deployment
+# and see if it fail or successfully updated
+# kubectl rollout status deployment/first-app
