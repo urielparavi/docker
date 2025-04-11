@@ -1825,3 +1825,21 @@ CMD ["nginx", "-g", "daemon off;"]
 # kubernetes will restart this pod again, and in each time that it happening again, it will restart and runing it
 # after longer time from before, to prevent infinite loop in case this container fail all the time
 
+
+
+194. Scaling in Action
+
+# Here we demonstrate that when we get to error route, one pod will crash down, but since we have now 3 pods, 
+# the traffic will distribute on the remain pods that left
+
+# replica is an instance of a pod / container, So here we running that same pod / container that we have 3 times.
+# So since we have the load balancer and we scaled our app to 3 pods, the traffic will not just going to one and
+# the same pod all the time, but it is being distributed across our different pods
+# kubectl scale deployment/first-app --replicas=3
+
+
+# kubectl get pods
+
+# We returned our state to one pod
+# kubectl scale deployment/first-app --replicas=1
+
