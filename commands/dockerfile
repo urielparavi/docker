@@ -1950,3 +1950,7 @@ CMD ["nginx", "-g", "daemon off;"]
 # To check if our deployment object deleted
 # kubectl get deployments
 
+
+
+198. Creating a Deployment Configuration File (Declarative Approach)
+

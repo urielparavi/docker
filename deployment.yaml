@@ -1,0 +1,7 @@
+# This is a required field that tells Kubernetes which version of the API to use when we managing the object we defining.
+apiVersion: apps/v1
+# Here we defined a kind key, so the kind of kubernetes object we wanna create and it could be Deployment, Service, Job etc..
+kind: Deployment
+metadata:
+  name: second-app-deployment
+spec:  
