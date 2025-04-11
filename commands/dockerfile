@@ -1893,3 +1893,60 @@ CMD ["nginx", "-g", "daemon off;"]
 # If we want to see if our deployment update, we can check it with 'kubectl rollout status' and the name of the deployment
 # and see if it fail or successfully updated
 # kubectl rollout status deployment/first-app
+
+
+
+196. Deployment Rollbacks & History
+
+# We demonstrate that if we update image that not exist, it will not update our deployment and the container, since
+# this image 'urielpa/kub-first-app:3' not exist on Docker Hub
+# kubectl set image deployment/first-app kub-first-app=urielpa/kub-first-app:3
+
+# We see the status of our deployment object, so the status of our updating and the replicas that should terminate
+# kubectl rollout status deployment/first-app
+
+
+# ***We access to kubernetes dashboard***
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+
+# We check the status of our pods
+# kubectl get pods
+
+# We undo the updating of that image that doesn't exist
+# kubectl rollout undo deployment/first-app
+
+# We see if our undo succeed, so it does, we'll see in our case 'first-app successfully rolled out'
+# kubectl rollout status deployment/first-app
+
+# We see our revisions, so how versions/stages/snapshot we did to this deployment - 'first-app'
+# kubectl rollout history deployment/first-app
+
+# We go back in time to this snapshot/version, so in this case it's revision 2.
+# kubectl rollout history deployment/first-app --revision=2
+
+# We go back in time to this snapshot/version, so in this case it's revision 1 before we update our code.
+# kubectl rollout history deployment/first-app --revision=1
+
+
+# Service - The job of the service it's to exposes pods to the cluster or externally
+# We delete our service 
+# kubectl delete service first-app
+
+
+# We delete our deployment
+# kubectl delete deployment first-app
+
+# To check if our deployment object deleted
+# kubectl get deployments
+
