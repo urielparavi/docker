@@ -1999,3 +1999,62 @@ spec:
 # # Sidenote - Here it will not work, because we missing the 'selector' field
 # kubectl apply -f=deployment.yaml
 
+
+
+200. Working with Labels & Selectors
+
+# Here we just added the selector and the lables
+
+
+# This is a required field that tells Kubernetes which version of the API to use when we managing the object we defining.
+apiVersion: apps/v1
+# Here we defined a kind key, so the kind of kubernetes object we wanna create and it could be Deployment, Service, Job etc..
+kind: Deployment
+metadata:
+  name: second-app-deployment
+# spec - The specification of the deployment object
+spec:  
+  # replicas - The number of pod instances that we want as a default. So if we expect a lot of traffic we can set it to
+  # more than one pod. So we can have multipule pods we we increase the replicas, but it's always the same pods with
+  # the same containers inside of it. If we want different pods with different containers, we need different deployments
+  replicas: 1
+  # On the selector key we add a matchLables key or matchExpressions
+  selector:
+    # matchLabels - key value pair of the pod labels we wanna match with this deployment object. So when we add these key value
+    # pair, it sees if there are any pods with these key value that it should control, and it could be even mutiple key values
+    # that specified on one pod 
+    matchLabels:
+      app: second-app
+      tier: backend
+  # template - Here we defined the pods that should be created as part of this deployment 
+  # Sindenote - template always describes a pod, so it always will be a pod object, and therefore we don't need to 
+  # add Kind: Pod
+  template:
+    # metadata - Since pod is a new object in the Kubernetes world, we need to defined it with metadata 
+    metadata:
+      # The labels of our pod - they can be one or more lables, but we need to make sure that they are same lables
+      # (key and the value) that we specified on the selector on the deployment object, and that's how this deployment
+      # will know which pods which are out there runing in the cluster should be controlled by it
+      labels:
+        app: second-app
+        tier: backend
+    # spec - The specification of the Pod object, so how this individual pod/s should configured    
+    spec:
+      containers:
+        - name: second-node
+          image:  urielpa/kub-first-app:2
+          # If we want we can have multipule containers in our pod
+          # - name: ...
+            # image: ...
+              
+
+#############################################################
+
+# We created this deployment
+# kubectl apply -f=deployment.yaml
+
+# We see that deployment up and runing
+# kubectl get deployments
+
+# And we also see this pod un and running
+# kubectl get pods
