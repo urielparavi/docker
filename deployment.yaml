@@ -4,4 +4,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: second-app-deployment
+# spec - The specification of the deployment object
 spec:  
+  # replicas - The number of pod instances that we want as a default. So if we expect a lot of traffic we can set it to
+  # more than one pod. So we can have multipule pods we we increase the replicas, but it's always the same pods with
+  # the same containers inside of it. If we want different pods with different containers, we need different deployments
+  replicas: 1
+  # template - Here we defined the pods that should be created as part of this deployment 
+  # Sindenote - template always describes a pod, so it always will be a pod object, and therefore we don't need to 
+  # add Kind: Pod
+  template:
+    # metadata - Since pod is a new object in the Kubernetes world, we need to defined it with metadata 
+    metadata:
+      labels:
+        app: second-app
+    # spec - The specification of the Pod object, so how this individual pod/s should configured    
+    spec:
+      containers:
+        - name: second-node
+          image:  urielpa/kub-first-app:2
+          # If we want we can have multipule containers in our pod
+          # - name: ...
+            # image: ...
+              
