@@ -2137,3 +2137,52 @@ spec:
 # We delete all the resource that we created with the dployment ojbect, and service object by specify their name file
 # kubectl delete -f=deployment.yaml -f=service.yaml
 
+
+
+203. Multiple vs Single Config Files
+
+
+apiVersion: v1
+kind: Service
+metadata: 
+  name: backend
+spec: 
+  selector: 
+    app: second-app
+  ports:
+    - protocol: 'TCP'
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
+# --- This is a yaml specific syntax which means a brand new object starts thereafter and it must be 3 dashes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: second-app-deployment
+spec:  
+  replicas: 1
+  selector:
+    matchLabels:
+      app: second-app
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: second-app
+        tier: backend    
+    spec:
+      containers:
+        - name: second-node
+          image:  urielpa/kub-first-app:2
+       
+
+###############################################################
+# We delete the objects on the separate files
+# kubectl delete -f=deployment.yaml -f=service.yaml
+
+# And then demonstrate that our object work fine in the merged config file - master-deployment
+# kubectl apply -f=master-deployment.yaml
+
+# Our URL
+# http://localhost:80
