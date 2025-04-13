@@ -2114,3 +2114,26 @@ spec:
 # Short command to get service, so svc is just a short alias for services
 # kubectl get svc
 
+
+
+202. Updating & Deleting Resources
+
+# We apply the configuration after our updating the same way like we created it on the first time
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+# We delete our deployment object (so all the resource that we created by this deployment) by his name
+# kubectl delete second-app-deployment
+
+# We delete all the resource of the dployment ojbect by specify the file
+# kubectl delete -f=deployment.yaml
+
+# We delete all the resource that we created with the dployment ojbect, and service object by specify their files
+# with comma separation
+# kubectl delete -f=deployment.yaml,service.yaml
+
+# We delete all the resource that we created with the dployment ojbect, and service object by specify their name file
+# kubectl delete -f=deployment.yaml -f=service.yaml
+
