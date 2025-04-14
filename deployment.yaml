@@ -49,7 +49,27 @@ spec:
     spec:
       containers:
         - name: second-node
-          image:  urielpa/kub-first-app:2
+          image: urielpa/kub-first-app:2
+          # We define how kubernetes should verify whether that container is up and running - so the default health check 
+          # by kubernetes would work as before as well, but it's still works with our own livenessProbe.
+          # So defining such a livenessProbe can be very useful if we have an application which doesn't react to the default,
+          # or if we simply want to check the health by sending a request to slash something insead of just slash. 
+          # So knowing how that can be defined can be very helpful to ensure that our application work no matter how they
+          # are structured of configured
+          # livenessProbe - We configure with that health check of our pod/container by kubernetes, so we change how this 
+          # container is checked by kubernetes to see whether it's up and runing.
+          livenessProbe: 
+            # httpGet - we define configure the Gethttp request that should be sent by the kubernetes to runing application 
+            httpGet:
+              # Of course it that it could be another nested path our application might have
+              path: /
+              # Our port in our container, since that's the port this containar exposes
+              port: 8080
+            # We define how often the check health that should be performed, so 10 seconds meaning that every 10 seconds
+            # we'll check if our app is healty or not
+            periodSeconds: 10
+            # Here we define how long it should wait until it checks the health for the first time
+            initialDelaySeconds: 5  
           # If we want we can have multipule containers in our pod
           # - name: ...
             # image: ...

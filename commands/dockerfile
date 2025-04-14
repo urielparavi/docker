@@ -2211,3 +2211,16 @@ spec:
 
 # We also can delete object by his name
 # kubectl delete deployment second-app-deployment
+
+
+
+205. Liveness Probes
+
+
+# kubectl apply -f=deployment.yaml -f=service.yaml
+
+
+# kubectl get svc backend
+
+# We see here the restarts of our container with our changes with the LivenessProbe
+# kubectl get pods
