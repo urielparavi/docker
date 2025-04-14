@@ -6,6 +6,9 @@ kind: Service
 metadata: 
   # We naming the service 'backend'
   name: backend
+  # We added label - 'group: example' for the Service ojbect, so this label represent the service object 
+  labels: 
+    group: example
 # spec - The specification/configuration of the service  
 spec: 
   # selector - Identifies which other resources should be controlled or connected to this service resource.

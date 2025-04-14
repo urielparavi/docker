@@ -2186,3 +2186,28 @@ spec:
 
 # Our URL
 # http://localhost:80
+
+
+
+204. More on Labels & Selectors
+
+
+
+# We delete the master-deployment.yaml
+# kubectl delete -f=master-deployment.yaml
+
+# We re-aplly our deployment object and the service object, creating them from start
+# kubectl apply -f=deployment.yaml -f=service.yaml
+
+
+# We check that we have the deployment
+# kubectl get deployments
+
+# We check that we have the service
+# kubectl get svc
+
+# And now we delete by the -l flag (by label) all the deployments and services which have these labels, so 'group=example'
+# kubectl delete deployments,services -l group=example
+
+# We also can delete object by his name
+# kubectl delete deployment second-app-deployment

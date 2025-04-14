@@ -4,6 +4,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: second-app-deployment
+  # We added label - 'group: example' for the Deployment ojbect, so this label represent the deployment object and not the pod
+  # or something else
+  labels:
+    group: example
 # spec - The specification of the deployment object
 spec:  
   # replicas - The number of pod instances that we want as a default. So if we expect a lot of traffic we can set it to
@@ -11,6 +15,8 @@ spec:
   # the same containers inside of it. If we want different pods with different containers, we need different deployments
   replicas: 1
   # On the selector key we add a match lables key or matchExpressions
+  # selector - With the selector we can connect other resource to our resource (in our case the deployment 
+  # ojbect), for example to connect pods to this deployment object with the selector by matchLabels or match expressions.
   selector:
     # matchLabels - key value pair of the pod labels we wanna match with this deployment object. So when we add these key value
     # pair, it sees if there are any pods with these key value that it should control, and it could be even mutiple key values
@@ -18,6 +24,15 @@ spec:
     matchLabels:
       app: second-app
       tier: backend
+      # matchExpressions - is a more powerful way of selecting things where we simply have more configuration options,
+      # where we can do more. So we have list of expressions which all have to be satisfied on order to have a matching object.
+      # The operator can only accept specific values - In, NotIn, Exists, DoesNotExist (check in documantation).
+      # So what saying here it's that we wanna select all pods where the 'app' label has a value in this range that we added
+      # in the array, so: second-app, first-app, so one of this values, which of cource would be true for the pod
+      # 'app: second-app', because it has an 'app' label with the value of 'second app' which is one of the two supported labels
+      # specified here.
+      # matchExpressions:
+      #   - {key: app, operator: In, values: [second-app, first-app]}
   # template - Here we defined the pods that should be created as part of this deployment 
   # Sindenote - template always describes a pod, so it always will be a pod object, and therefore we don't need to 
   # add Kind: Pod
