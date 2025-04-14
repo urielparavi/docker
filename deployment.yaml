@@ -49,7 +49,16 @@ spec:
     spec:
       containers:
         - name: second-node
+          # If we want to update our container without changing the image name or changing the tag name like: 
+          # kub-first-app => kub-first-app:2 or kub-first-app:2 => kub-first-app:3, we can add the latest tag
+          # and this way it will always pull the image and use the latest image therefore, but if we don't specify colon
+          # latest, it will not repull it.
+          # image: urielpa/kub-first-app:latest
           image: urielpa/kub-first-app:2
+          # imagePullPolicy - Another way to pick our update/latest image without changing the image name or the tag.
+          # So with imagePullPolicy kubernetes pull the latest image without us having to changing the name or the tag,
+          # since we changing the policy of picking the image
+          imagePullPolicy: Always
           # We define how kubernetes should verify whether that container is up and running - so the default health check 
           # by kubernetes would work as before as well, but it's still works with our own livenessProbe.
           # So defining such a livenessProbe can be very useful if we have an application which doesn't react to the default,

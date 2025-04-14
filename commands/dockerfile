@@ -2224,3 +2224,22 @@ spec:
 
 # We see here the restarts of our container with our changes with the LivenessProbe
 # kubectl get pods
+
+
+
+206. A Closer Look at the Configuration Options
+
+# We build the image again without us having to change the tag
+# docker build -t urielpa/kub-first-app:2 .
+
+# Push it to Docker Hub
+# docker push urielpa/kub-first-app:2
+
+# We apply our object
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+
+# kubectl delete -f=deployment.yaml -f=service.yaml
