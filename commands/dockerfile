@@ -2243,3 +2243,14 @@ spec:
 
 
 # kubectl delete -f=deployment.yaml -f=service.yaml
+
+
+
+210. Starting Project & What We Know Already
+
+
+# docker-compose up -d --build
+
+# docker-compose down
+
+# docker-compose up
