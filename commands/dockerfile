@@ -2254,3 +2254,25 @@ spec:
 # docker-compose down
 
 # docker-compose up
+
+
+
+213. Creating a New Deployment & Service
+
+
+# kubectl get deployments
+
+
+# docker build -t urielpa/kub-data-demo .
+
+
+# docker push urielpa/kub-data-demo
+
+
+# kubectl apply -f=service.yaml -f=deployment.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get svc story-service
