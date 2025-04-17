@@ -32,4 +32,9 @@ app.post('/story', (req, res) => {
   });
 });
 
+// We added this route to check our volume - to check the cases where our data save or not
+app.get('/error', () => {
+  process.exit(1);
+});
+
 app.listen(3000);

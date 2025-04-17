@@ -2276,3 +2276,72 @@ spec:
 
 
 # kubectl get svc story-service
+
+
+
+215. A First Volume: The emptyDir Type
+
+
+# We adding the The emptyDir Type here
+
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: story-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: story
+  template:
+    metadata:
+      labels:
+        app: story
+    spec: 
+      containers:
+        - name: story
+          image: urielpa/kub-data-demo:1
+          # Here we bind the volume into a container
+          volumeMounts: 
+              # Here we define where which volume should be mounted
+              # mountPath - This is the container internal path where this should be mounted, and this depends on our 
+              # application and where it's going to write data. This application is going to wrire data in a story folder,
+              # and it's doing this inside of the project folder of this code file and therefore in the working directory
+              # set up by the image. So app is the working directory in the dockerfile and in there we're accessing a 
+              # story folder where this text.txt file is created, and that's what we also define in the docker-compose file -
+              # so the named volume - stories:/app/story. So in short we tell Kubernetes, which type of volume should be created
+              # here
+            - mountPath: /app/story
+              # We point at the volume name, since we can have multiple volumes for a different containers or also because 
+              # maybe one container once use different volumes and different volumes types for different container internal path
+              name: story-volume
+      # Here we define all the voulume/s that should be part of this pod and all the containers in that pod will be able 
+      # to use that voulme/s       
+      volumes:
+      # Our voulme name
+        - name: story-volume
+          # We set up the volume type/driver, here we use the emptyDir type and we set it to empty object - this means that we
+          # don't have any specific configuration for it, but that we just want to use this type as it is with all its default
+          # settings
+          # emptyDir - Creates a new emapy directory whenever the pod starts and it keeps this directory alive and filled 
+          # with data as long as the pod is alive. Containers can then write to this directory and if containers restart or
+          # are removed the data survives, but if the pod should be removed, this directory is removed, and when the pod
+          # is recreated, a new empty directory is created
+          emptyDir: {}    
+
+  ###############################################################################
+
+# We builded our image since we added the error route
+# docker build -t urielpa/kub-data-demo:1 .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-data-demo:1 
+
+# We apply our deployment object with the new image
+# kubectl apply -f=deployment.yaml
+
+# Here we demonstrate that if we go to the error route the container will crashes but not the pod. The pod will restart it
+# kubectl get pods
+
+
+
