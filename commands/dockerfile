@@ -2345,3 +2345,26 @@ spec:
 
 
 
+216. A Second Volume: The hostPath Type
+
+# We demonstrate here that with a emptyDir if we have more then one pode, when we'll get error on the error route for
+# example, our data will be lost for some seconds, since the container that containe our data will crashe and we'll
+# redirect to the second pod, the pod that hasn't have our data. So we solve it with hostPath type/driver volume by
+# sharing the path/folder to all the pods that inside of the same machine/worker node, and by that, now if we will 
+# have an error and one container will crush, the other container will have the same data, since we're sharing it
+# to all the pods that inside our machine 
+
+
+# We apply it again with the new hostPath type/driver volume
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+
+
+
+
+
+
+
