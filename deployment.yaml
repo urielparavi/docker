@@ -14,7 +14,16 @@ spec:
     spec: 
       containers:
         - name: story
-          image: urielpa/kub-data-demo:1
+          image: urielpa/kub-data-demo:2
+          # We can add env key here and below that we can set up all our environment key value paris which we might need
+          # simply by adding a list of environment variables by using dashes here.
+          # So we make it more flexible - If we want to go for a different folder name, we only need to make changes here
+          # in our containers in the deployment here, and not make changes in app.js and rebuild the imaged and also push 
+          # it to Docker Hub
+          env: 
+            # So we chosing the name that we defined in app.js for our story folder and we provide his value.
+            - name: STORY_FOLDER
+              value: 'story'
           # Here we bind the volume into a container
           volumeMounts: 
               # Here we define where which volume should be mounted

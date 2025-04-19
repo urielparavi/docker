@@ -2506,6 +2506,23 @@ spec:
 
 
 
+223. Using Environment Variables
+
+# We changed our story folder in app.js to environment variable and used it on the deployment.yaml
+
+
+# docker build -t urielpa/kub-data-demo:2 . 
+
+
+# docker push urielpa/kub-data-demo:2
+
+
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+
 
 
 
