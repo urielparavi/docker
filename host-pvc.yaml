@@ -1,0 +1,35 @@
+# PVC (PersistentVolumeClaim):
+# - Defined by the developer/application.
+# - Requests storage with specific requirements (size, access mode).
+# - Kubernetes finds a suitable PV or provisions one dynamically.
+# - Acts as a bridge between the Pod and the storage.
+# - Mounted to the Pod via the deployment configuration.
+# Summary - In order to use the persitent volume we need to create a claim and that claim then need to be made by the pods
+# that want to use this volume. Therefore we gotta to two things: we first of all have to configure this claim here, and then
+# we have to use it it on all the pods that do wanna use it.
+apiVersion: v1 
+kind: PersistentVolumeClaim 
+metadata: 
+  name: host-pvc 
+# The specification/configuration for this claim  
+spec: 
+  # We specify which persistent volume we wanna claim. Here we have one, but we could multiple persistent volumes which also
+  # could use different types if we needed it
+  # Sidenote - We cannot just claim by name, there are other of claiming by resource, so that we don't claim one specific 
+  # persisten volume (it called "Dynamic Volume Persistent"), but if we had different volumes we could just say I want a 
+  # volume with that much space, this configuration etc..
+  volumeName: host-pv 
+  # We define the modes which we wanna use here for this claiming this (host-pv) volume, and we could also have multiple list
+  # modes here, but we want to claim by the only supported way which is the ReadWriteOnce access, because we're on single node,
+  # but if we would use this claim on different pods and some pods only need read access and other need read-write access,
+  # we could specify it here, we just need to allow it on our persistent volume host-pv 
+  accessModes: 
+    - ReadWriteOnce 
+  # resources - The counterpart to the capacify in host-pv and we can specify which resource we wanna get for this claim 
+  # and the resource object have a requests key nested below it and then can request storage 
+  resources: 
+    requests:
+      # So since we have a storage of one gigabyte as a capacity in the persistent volume host-pv, that's also the maximum we
+      # can request here, but we could also request less for this claim. So if we had multiple claims to the same persisten
+      # volume, we might wanna request less, so that in total we don't request more then we got available
+      storage: 1Gi

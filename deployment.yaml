@@ -34,6 +34,15 @@ spec:
       volumes:
       # Our voulme name
         - name: story-volume
+          # By the persistentVolumeClaim we connect our pod to our claim (host-pvc) so that ultimately it reaches out to the
+          # persistent volume host-pv and gets its volume 
+          # Sidenote - We can also use this claim in different pods, so we can use one of the same claim in different types
+          # of pods
+          persistentVolumeClaim:
+            # We specify the claim name, because we might have multiple claims
+            claimName: host-pvc
+
+          # ***Here we used the emptyDir, hostPath - the approaches we used before we use claiming***
           # We set up the volume type/driver, here we use the emptyDir type and we set it to empty object - this means that we
           # don't have any specific configuration for it, but that we just want to use this type as it is with all its default
           # settings
@@ -50,15 +59,19 @@ spec:
           # machine, since the hostPath is bind to one specific host machine/node worker. So if we have different pods on some 
           # other machine/node worker, they will not recognize the path/our directory, and actually it's like a bind mount just
           # that in this case our directory will be shared to all the pods that inside their machine
-          hostPath: 
+          # hostPath: 
             # path - The first key which we need to set is the path on the host machine where the data should be stored.
             # So not the path in the container, but the path on the host machine, and actually we share the path and whatever
             # is inside of that folder with this path in the container '/app/story'. So we could use hostPath to share some
             # already existing data, so we'll share whatever is inside of this path - this directory (/data) with the path
             # inside of the container '/app/story'
-            path: /data 
+            # path: /data 
             # We provide a type to let kubernetes know how this path '/data' should be handled 
             # DirectoryOrCreate - this means this should be an existing directory or it's created if it's not existing yet.
             # We could also set this to just Directory which means the '/data' directory, but it would fail it it doesn't exist
             # yet
-            type: DirectoryOrCreate
+            # type: DirectoryOrCreate
+        
+       
+
+          

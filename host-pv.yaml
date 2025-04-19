@@ -1,3 +1,9 @@
+# PV (PersistentVolume):
+# - Defined by the admin or via a StorageClass.
+# - Represents actual physical storage in the cluster.
+# - Contains details like size, access mode, and storage type.
+# - Not directly attached to any Pod.
+# - Waits to be bound by a matching PVC.
 apiVersion: v1
 kind: PersistentVolume
 metadata: 
