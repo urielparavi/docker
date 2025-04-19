@@ -25,6 +25,8 @@ spec:
   # we could specify it here, we just need to allow it on our persistent volume host-pv 
   accessModes: 
     - ReadWriteOnce 
+  # We need to add the storage class also here on the claim, not just on the persistent volume  
+  storageClassName: standard  
   # resources - The counterpart to the capacify in host-pv and we can specify which resource we wanna get for this claim 
   # and the resource object have a requests key nested below it and then can request storage 
   resources: 

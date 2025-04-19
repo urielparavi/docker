@@ -2479,10 +2479,30 @@ spec:
 
 
 
+221. Using a Claim in a Pod
+
+# ***Since we added the storage class, we re-apply it***
+
+# We get the sc - storage classes
+# kubectl get sc
 
 
+# kubectl apply -f=host-pv.yaml
 
 
+# kubectl apply -f=host-pvc.yaml
+
+
+# kubectl apply -f=deployment.yaml
+
+# We get the persistent volumes
+# kubectl get pv
+
+# We get our claims
+# kubectl get pvc
+
+
+# kubectl get deployments
 
 
 

@@ -26,6 +26,23 @@ spec:
   # We specify what will be allow when we claim this persisten volume and we can specify all modes, because it's only
   # when we claim a volume that we then have to define how we want to claim this volume for a given pod. Here we just
   # define what should generally be allowed, so how this may be claimed.
+
+  # A StorageClass in Kubernetes defines how to provision persistent storage dynamically.
+  # It acts like a recipe that tells Kubernetes which storage type to use (e.g., hostPath, AWS EBS, etc.).
+  # When a PersistentVolumeClaim (PVC) specifies a StorageClass, Kubernetes uses it to create a volume on demand.
+  # If no StorageClass is specified, the default one (if defined) will be used automatically.
+  # StorageClasses also define behavior like reclaim policy, volume binding mode, and supported parameters.
+
+  # storageClass in my our words: Kubernetes has a concept called storage classes and we got a storage class by default.
+  # So if we run kubectl get sc for storage class we'll see that there is a storage class default there on docker/minikube.
+  # The storage class is another concept which we have in Kubernetes to give administrators fine grand control over how storage
+  # is managed and how volumes can be configured. it's an advanced concept and for our purposes here, the default storage class
+  # is absolutely fine. The storage class in the end deinfed to Kubernetes how exactly that storage which we wanna use, in this
+  # case the hostpath storage shoule be provisioned we could say. So behined the scenes the storage class will provide import
+  # information to the persistent volume configuration we set up. It's works together with the persistent volume and our 
+  # standard storage class (in our case with docker and not minikube it will be just the hostpath default) which we got is 
+  # already configured for this hostpath type which is why it will work just fine here
+  storageClassName: standard
   accessModes:
     # Sidenote - we used 'ReadWriteOnce' since the 'ReadOnlyMany' and 'ReadWriteMany' are not option, since we're using 
     # the hostPast type (becasue we're on one single node since we're on develop mode). So they will not in available option
