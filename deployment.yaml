@@ -23,7 +23,17 @@ spec:
           env: 
             # So we chosing the name that we defined in app.js for our story folder and we provide his value.
             - name: STORY_FOLDER
-              value: 'story'
+              # Our previous way to use environment variables here in this file
+              # value: 'story'
+              # Since we used the ConfigMap, we need to add the valueFrom
+              valueFrom: 
+                # configMapKeyRef - Allow us to point at a specific ConfigMap and there in that map a specific data key
+                # which holds the value we wanna set as a value for this environment variable in this container
+                configMapKeyRef:
+                  # The name of the ConfigMap
+                  name: data-store-env
+                  # folder - our key name in the ConfigMap
+                  key: folder
           # Here we bind the volume into a container
           volumeMounts: 
               # Here we define where which volume should be mounted

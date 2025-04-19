@@ -2524,6 +2524,26 @@ spec:
 
 
 
+224. Environment Variables & ConfigMaps
+
+# We apply our ConfigMap object - our environment variables file
+# kubectl apply -f=environment.yaml
+
+
+# We can see here all the ConfigMaps we have
+# kubectl get configmap
+
+# We applyed again the deployment.yaml since we added the reference of the ConfigMap in our file
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+
 
 
 
