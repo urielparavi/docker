@@ -2544,6 +2544,15 @@ spec:
 
 
 
+228. Starting Project & Our Goal
+
+
+# docker-compose up -d --build
+
+
+# docker-compose down
+
+
 
 
 
