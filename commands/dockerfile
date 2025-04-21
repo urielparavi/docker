@@ -2554,6 +2554,36 @@ spec:
 
 
 
+229. Creating a First Deployment
+
+
+# kubectl get deployments
+
+
+# kubectl get services
+
+
+# cd users-api
+
+
+# docker build -t urielpa/kub-demo-users .
+
+
+# docker push urielpa/kub-demo-users
+
+
+# kubectl apply -f=users-deployment.yaml
+
+
+# cd ..
+
+# cd kubernetes
+
+
+# kubectl get pods
+
+
+
 
 
 
