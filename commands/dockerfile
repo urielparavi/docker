@@ -2584,6 +2584,47 @@ spec:
 
 
 
+230. Another Look at Services
+
+
+# kubectl apply -f=users-service.yaml
+
+
+# kubectl get svc users-service
+
+
+
+
+# --- Kubernetes Service Types Summary ---
+
+# ClusterIP: Default type. Internal communication only. Accessible only within the cluster.
+# DNS available: my-service.namespace.svc.cluster.local
+
+# NodePort: Exposes service on a static port (30000-32767) on each Node IP. External access allowed.
+# No stable domain – use <Node-IP>:<NodePort>
+
+# LoadBalancer: Exposes service via external cloud load balancer (AWS/GCP/Azure).
+# Provides stable public IP or domain (e.g. from AWS ELB)
+
+# ClusterIP = internal use 🔒
+# NodePort = quick external access 🚪
+# LoadBalancer = production-grade exposure 🌍
+
+
+
+231. Multiple Containers in One Pod
+
+
+# docker build -t urielpa/kub-demo-auth .
+
+
+# docker push urielpa/kub-demo-auth
+
+
+# docker build -t kub-demo-users .
+
+
+# docker push urielpa/kub-demo-users
 
 
 

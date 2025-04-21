@@ -15,6 +15,7 @@ app.get('/verify-token/:token', (req, res) => {
   res.status(401).json({ message: 'Token invalid.' });
 });
 
+// For login
 app.get('/token/:hashedPassword/:enteredPassword', (req, res) => {
   const hashedPassword = req.params.hashedPassword;
   const enteredPassword = req.params.enteredPassword;
@@ -27,6 +28,7 @@ app.get('/token/:hashedPassword/:enteredPassword', (req, res) => {
   res.status(401).json({ message: 'Passwords do not match.' });
 });
 
+// For signup
 app.get('/hashed-password/:password', (req, res) => {
   // dummy hashed pw generation!
   const enteredPassword = req.params.password;

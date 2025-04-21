@@ -14,4 +14,6 @@ spec:
     spec:
       containers: 
         - name: users 
-          image: urielpa/kub-demo-users
+          image: urielpa/kub-demo-users:latest
+        - name: auth
+          image: urielpa/kub-demo-auth:latest
