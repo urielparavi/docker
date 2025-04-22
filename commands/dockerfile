@@ -2638,5 +2638,12 @@ spec:
 
 
 
+233. Creating Multiple Deployments
+
+
+# Here we created a service and deployment objects for the auth pod 
+
+
+
 
 
