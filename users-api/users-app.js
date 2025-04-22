@@ -54,8 +54,19 @@ app.post('/login', async (req, res) => {
 
   // normally, we'd find a user by email and grab his/ her ID and hashed password
   const hashedPassword = password + '_hash';
+  // Our first approach
+  // const response = await axios.get(
+  //   `http://${process.env.AUTH_ADDRESS}/token/` + hashedPassword + '/' + password
+  // );
   const response = await axios.get(
-    `http://${process.env.AUTH_ADDRESS}/token/` + hashedPassword + '/' + password
+    // In Kubernetes, auto-generated environment variables like AUTH_SERVICE_SERVICE_HOST are created automatically
+    // by the system for each service. These variables provide the internal IP addresses and ports of services within the 
+    // cluster. This simplifies service communication by automatically setting up environment variables for DNS resolution
+    // and direct communication between services.
+    // The name of the envirnment variable come from our service's name, so if for example our service name
+    // was 'exmaple-service', the auto-generated environment variable will be 'EXAMPLE_EXAMPLE_SERVICE_HOST',
+    // and if the service's name was 'example', the auto-generated environment variable will be 'EXAMPLE_SERVICE_HOST'
+    `http://${process.env.AUTH_SERVICE_SERVICE_HOST}/token/` + hashedPassword + '/' + password
   );
   // const response = { status: 200, data: { token: 'abc ' }};
   if (response.status === 200) {

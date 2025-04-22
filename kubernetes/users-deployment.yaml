@@ -24,6 +24,11 @@ spec:
           # address we can use localhost as an adress if wanna send a request to another container running in the same pod.
           env: 
             - name: AUTH_ADDRESS 
-              value: localhost
+              # value: localhost
+              # So for the Signup in users-app.js we use the manually approach to show also that we can use the IP of the
+              # service of the auth-service object by pulling its IP from kubectl get svc. 
+              # So we show both way - the manually aproach like here, and the auto-generated environment variable by kubernetes
+              # (check on users-app.js in the login for more details)
+              value: "10.111.132.114"
         # - name: auth
         #   image: urielpa/kub-demo-auth:latest

@@ -2645,5 +2645,40 @@ spec:
 
 
 
+234. Pod-to-Pod Communication with IP Addresses & Environment Variables
+
+# We applied the service, deployment object since we didn't apply them
+# kubectl apply -f=auth-service.yaml -f=auth-deployment.yaml
+
+# We get all the services that exist
+# kubectl get svc
+
+# We re-apply the users-deployment since we added the service IP of the auth, so the IP of the auth-service 
+# kubectl apply -f=users-deployment.yaml
 
 
+# kubectl get pods
+
+
+# kubectl get deployments
+
+# We re-build the image again since we added in users-app.js the auto-generated environment variable - 
+# AUTH_SERVICE_SERVICE_HOST
+# docker build -t urielpa/kub-demo-users .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-users
+
+# We apply the users-deployment again
+# kubectl apply -f=users-deployment.yaml
+
+# We delete the users-deployment to make sure that our change will be taken into account, because otherwise this deployment
+# wouldn't do anything, because the file didn't change and then Kubernetes will not re-pull the image. For that we
+# would have to use a different tag which we change all the time
+# kubectl delete -f=users-deployment.yaml
+
+# Re apply it
+# kubectl apply -f=users-deployment.yaml
+
+
+# kubectl get pods

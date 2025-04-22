@@ -6,6 +6,11 @@ services:
     build: ./users-api
     environment: 
       AUTH_ADDRESS: auth
+     # In Docker Compose, we need to manually define AUTH_SERVICE_SERVICE_HOST.
+     # Unlike Kubernetes, this variable won't be automatically set to the service's IP.
+     # Instead, we assign it the DNS name of the container (auth), since Docker Compose
+     # uses service names for internal DNS resolution.
+      AUTH_SERVICE_SERVICE_HOST: auth
     ports: 
       - "8080:8080"
   tasks:
