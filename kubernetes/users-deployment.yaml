@@ -15,5 +15,15 @@ spec:
       containers: 
         - name: users 
           image: urielpa/kub-demo-users:latest
+          # We can create file fo environment variables of to that on the fly like here.
+          
+          # localhost - For pod internal communication, so when 2 containers run in the same pod, Kubernetes allows us to send
+          # request to the localhost address and then using the port which is exposed by the other container (the users).
+          # So localhost is the magic address we can use inside of a pod. So if we have one container running in a pod, 
+          # which executes some code which also runs on the server side so to say, inside of the pod and that code needs an
+          # address we can use localhost as an adress if wanna send a request to another container running in the same pod.
+          env: 
+            - name: AUTH_ADDRESS 
+              value: localhost
         - name: auth
           image: urielpa/kub-demo-auth:latest

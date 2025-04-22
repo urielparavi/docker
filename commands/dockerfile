@@ -2628,6 +2628,14 @@ spec:
 
 
 
+232. Pod-internal Communication
+
+
+# kubectl apply -f=users-deployment.yaml
+
+
+# kubectl get pods
+
 
 
 
