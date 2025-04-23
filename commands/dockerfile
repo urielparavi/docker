@@ -2682,3 +2682,30 @@ spec:
 
 
 # kubectl get pods
+
+
+
+235. Using DNS for Pod-to-Pod Communication
+
+
+# kubectl get svc
+
+###############################
+
+# A Namespace is a way to logically divide a Kubernetes cluster.
+# It is commonly used to separate:
+# - Environments like: dev (development), staging (pre-production), and production (live)
+# - Teams working on the same cluster (e.g., frontend-team, backend-team)
+# - Customers or projects in multi-tenant systems (e.g., customer-a, customer-b)
+#
+# Namespaces provide resource isolation and let you use the same resource names
+# in different contexts without conflicts. Each namespace can have its own
+# pods, deployments, services, config maps, secrets, and permissions (RBAC).
+
+#######################################
+
+# We get our namespace for the DNS
+# kubectl get namespaces
+
+# We apply it again afer adding the DNS to our service
+# kubectl apply -f=users-deployment.yaml
