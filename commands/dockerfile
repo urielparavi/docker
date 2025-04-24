@@ -2755,3 +2755,55 @@ spec:
 # http://localhost:8000/tasks, localhost:8000/tasks
 
 
+
+239. Adding a Containerized Frontend
+
+
+# cd frontend
+
+# We build our image for the frontend that we added now
+# docker build -t urielpa/kub-demo-frontend .
+
+
+# We run our frontend container
+# docker run -p 80:80 --rm -d urielpa/kub-demo-frontend
+
+
+# Our frontend URL: http://localhost/
+
+
+# cd ..
+
+
+# cd tasks-api
+
+
+# We re-build thas tasks image since we added the middleware for CORS 
+# docker build -t urielpa/kub-demo-tasks .
+
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-tasks 
+
+
+# cd ..
+
+
+# cd kubernetes
+
+
+# We delete our tasks-deployment even that we not changed it, because our image changed and we want that Kubernetes will
+# take the latest snapshot for this image 
+# kubectl delete -f=tasks-deployment.yaml
+
+
+# We re-apply it
+# kubectl apply -f=tasks-deployment.yaml
+
+
+# kubectl get pods
+
+# Run our container
+# docker run -p 80:80 --rm -d urielpa/kub-demo-frontend
+
+
