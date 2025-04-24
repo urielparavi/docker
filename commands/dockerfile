@@ -2709,3 +2709,49 @@ spec:
 
 # We apply it again afer adding the DNS to our service
 # kubectl apply -f=users-deployment.yaml
+
+
+
+238. Challenge Solution
+
+# We're entering the folder tasks-api since our project there and we need to build the image after adding
+# environment variable in task-app.js (AUTH_ADDRESS)
+# cd tasks-api
+
+# We build the image
+# docker build -t urielpa/kub-demo-tasks .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-tasks
+
+# We going to Kubernetes folder and apply our files there because they are there
+# cd .. 
+
+# cd kubernetes
+
+# kubectl apply -f=tasks-service.yaml -f=tasks-deployment.yaml
+
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+# kubectl apply -f=tasks-deployment.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+# kubectl get svc
+
+
+# The task's url
+# http://localhost:8000/tasks, localhost:8000/tasks
+
+

@@ -1,0 +1,26 @@
+apiVersion: apps/v1  
+kind: Deployment 
+metadata: 
+  name: tasks-deployment
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels:  
+      app: tasks
+  template: 
+    metadata: 
+      labels:
+        app: tasks 
+    spec:
+      containers: 
+        - name: tasks 
+          image: urielpa/kub-demo-tasks:latest
+          # When we using Kubernetes and docker-compose we need to assign our environment variables on both of them, 
+          # so here for example we assign the AUTH_ADDRESS and the TASKS_FOLDER, but we also assign them in the docker-compose, 
+          # except for the auto-generated environment variable, since it automatically assign its IP, so we don't need to 
+          # defined it here, just on docker-compose and our file app - so tasks-app.js, users-app.js and so on
+          env: 
+            - name: AUTH_ADDRESS 
+              value: "auth-service.default"
+            - name: TASKS_FOLDER  
+              value: tasks

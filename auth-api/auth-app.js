@@ -5,6 +5,9 @@ const app = express();
 
 app.use(bodyParser.json());
 
+// The function for task - so from the tasks-app.js this http request will carried out and we passed this token (abc) from 
+// there, so the extractAndVerifyToken function, and it will run for the get and post request from tasks to here to check
+// that the user has a token
 app.get('/verify-token/:token', (req, res) => {
   const token = req.params.token;
 

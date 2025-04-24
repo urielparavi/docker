@@ -17,7 +17,15 @@ services:
     build: ./tasks-api
     ports: 
       - "8000:8000"
+    # Sidenote - We need to remember that if we use environment variable in Kubernetes, we need to defined it also here 
+    # on docker-compose, to let docker-compose know about it, and it mabe will be in docker-compose a different value 
+    # (of the environment variable) like the auto-generated environment variable - So in this case Kubernetes will assign it
+    # it's IP, but here it's represent something else, for example the AUTH_SERVICE_SERVICE_HOST, since here its value is 
+    # 'auth' which is the internal DNS for this container.
+    # Also we shouldn't forget the usual cases of environment variables like the AUTH_ADDRESS, because in this case, it's just
+    # represent the tasks folder that we assign in tasks-app.js
     environment:
       TASKS_FOLDER: tasks
-    volumes:
-      - /app/tasks
+      AUTH_ADDRESS: auth
+    # volumes:
+    #   - /app/tasks
