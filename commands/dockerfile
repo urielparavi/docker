@@ -2807,3 +2807,28 @@ spec:
 # docker run -p 80:80 --rm -d urielpa/kub-demo-frontend
 
 
+
+240. Deploying the Frontend with Kubernetes
+
+
+
+# We build the image before, so now we just push it to Docker Hub
+# docker push urielpa/kub-demo-frontend
+
+
+# cd kubernetes
+
+
+# We apply our new frontend service, frontend deployment objects
+# kubectl apply -f=frontend-service.yaml -f=frontend-deployment.yaml
+
+
+# kubectl get pods
+
+
+# kubectl get svc
+
+
+# Our URL that we expose for the frontend on the browser
+# Our frontend URL: http://localhost:80
+
