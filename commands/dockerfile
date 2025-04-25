@@ -2832,3 +2832,91 @@ spec:
 # Our URL that we expose for the frontend on the browser
 # Our frontend URL: http://localhost:80
 
+
+
+241. Using a Reverse Proxy for the Frontend
+
+
+# Reverse Proxy - Explanation
+# A Reverse Proxy is a server that forwards client requests to internal or other servers.
+# It works in contrast to a Forward Proxy, which forwards client requests to external resources.
+# Main uses:
+# 1. Forwarding requests to internal servers - routes requests based on the path (e.g., /api/ forwards to an API server).
+# 2. Load Balancing - distributes incoming traffic across multiple internal servers to prevent overload on a single server.
+# 3. Security - hides the internal servers from direct client access, acting as a barrier.
+# 4. Caching - stores request results to improve performance for subsequent requests.
+# 5. SSL Termination - handles HTTPS encryption without burdening internal servers.
+# 6. Performance Tuning - serves static content like images, CSS, JS, or forwards requests based on specific criteria.
+#
+# Example Configuration:
+# Forwarding API requests to an internal server (another service in Kubernetes)
+# Serving static files through Nginx
+
+#####################################################
+
+# cd frontend
+
+
+# We build our image after we changed our URL fetch('/api/tasks'....) to our Nginx that redirect these requests
+# to their backend, in our case it the task backend
+# docker build -t urielpa/kub-demo-frontend .
+
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-frontend
+
+
+
+# cd ..
+
+
+# cd kubernetes
+
+
+# We delete since we're update our image but our file doesn't changed, so we want that it take the last update image
+# kubectl delete -f=frontend-deployment.yaml
+
+
+# We re-appied it
+# kubectl apply -f=frontend-deployment.yaml
+
+
+
+# kubectl get pods
+
+
+
+# cd ..
+
+
+
+# cd frontend
+
+
+# We re-build our image after we changed our DNS in our Nginx config
+# docker build -t urielpa/kub-demo-frontend .
+
+
+# We push to Docker Hub
+# docker push urielpa/kub-demo-frontend
+
+
+
+# cd .. 
+
+
+
+# cd kubernetes
+
+
+# We delete since we're update our image but our file doesn't changed, so we want that it take the last update image
+# kubectl delete -f=frontend-deployment.yaml
+
+
+# We re-appied it
+# kubectl apply -f=frontend-deployment.yaml
+
+
+
+# Our URL
+# http://localhost/ or localhost
