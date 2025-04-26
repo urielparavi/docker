@@ -2939,3 +2939,26 @@ spec:
 
 
 # docker push urielpa/kub-dep-auth 
+
+
+
+252. Applying Our Kubernetes Config
+
+# Here we upload these files to AWS in the CloudShell - Select Actions and upload file and then run it in the CloudShell,
+# since from now our cluster is the cluster that on AWS and not the dummy cluster for the development from Docker in our
+# virtual machine, so all these commands we run on CloudShell in AWS
+
+# kubectl apply -f=auth.yaml -f=users.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+# kubectl get svc
+
+
+# kubectl get namespaces
+
