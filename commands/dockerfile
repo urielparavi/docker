@@ -2920,3 +2920,22 @@ spec:
 
 # Our URL
 # http://localhost/ or localhost
+
+
+
+247. Preparing the Starting Project
+
+
+# docker build -t urielpa/kub-dep-users .
+
+
+
+# docker push urielpa/kub-dep-users 
+
+
+
+# docker build -t urielpa/kub-dep-auth .
+
+
+
+# docker push urielpa/kub-dep-auth 

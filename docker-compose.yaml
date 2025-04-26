@@ -2,30 +2,14 @@ version: "3"
 services:
   auth:
     build: ./auth-api
+    ports:
+      - '8000:3000'
+    environment:
+      TOKEN_KEY: 'shouldbeverysecure'
   users:
     build: ./users-api
-    environment: 
-      AUTH_ADDRESS: auth
-     # In Docker Compose, we need to manually define AUTH_SERVICE_SERVICE_HOST.
-     # Unlike Kubernetes, this variable won't be automatically set to the service's IP.
-     # Instead, we assign it the DNS name of the container (auth), since Docker Compose
-     # uses service names for internal DNS (here it's the domain name system) resolution.
-      AUTH_SERVICE_SERVICE_HOST: auth
-    ports: 
-      - "8080:8080"
-  tasks:
-    build: ./tasks-api
-    ports: 
-      - "8000:8000"
-    # Sidenote - We need to remember that if we use environment variable in Kubernetes, we need to defined it also here 
-    # on docker-compose, to let docker-compose know about it, and it mabe will be in docker-compose a different value 
-    # (of the environment variable) like the auto-generated environment variable - So in this case Kubernetes will assign it
-    # it's IP, but here it's represent something else, for example the AUTH_SERVICE_SERVICE_HOST, since here its value is 
-    # 'auth' which is the internal DNS for this container.
-    # Also we shouldn't forget the usual cases of environment variables like the AUTH_ADDRESS, because in this case, it's just
-    # represent the tasks folder that we assign in tasks-app.js
+    ports:
+      - '8080:3000'
     environment:
-      TASKS_FOLDER: tasks
-      AUTH_ADDRESS: auth
-    # volumes:
-    #   - /app/tasks
+      MONGODB_CONNECTION_URI: 'mongodb+srv://urielparavi:urielpa30808@cluster0.gqo0gza.mongodb.net/users?retryWrites=true&w=majority'
+      AUTH_API_ADDRESSS: 'auth:3000'
