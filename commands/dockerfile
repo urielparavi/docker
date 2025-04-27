@@ -3071,3 +3071,77 @@ spec:
 
 
   ###########################################################################
+
+
+
+  256. Using the EFS Volume
+
+# Sidenote - CSI (Container Storage Interface) is the method or standard through which Kubernetes connects to external storage — in your case, to AWS EFS, so it's a drive. In kubernetes it's part of volumes, but it's not volume like emptiDir or 
+# hostPath, but it's just the Gateway, so the driver between Kubernetes and our  storage provider - the EFS in AWS
+
+# CSI (Container Storage Interface) is a standard that defines how storage drivers integrate with Kubernetes.
+# It allows Kubernetes to work with any storage provider (AWS, GCP, Azure, etc.) through a unified interface.
+
+# provisioner: Here we are using the AWS EFS CSI Driver (efs.csi.aws.com).
+# This driver knows how to connect to Amazon EFS and dynamically provision storage volumes for our pods.
+
+# Each major cloud provider creates its own CSI driver (e.g., EBS for AWS, Filestore for GCP),
+# and Kubernetes communicates with them using the same standardized CSI protocol.
+
+# In short: This allows external storage to be easily, intelligently, and dynamically attached to pods without manual 
+# configuration.
+
+
+
+# cd users-api
+
+
+
+# docker build -t urielpa/kub-dep-users .
+
+
+
+# docker push urielpa/kub-dep-users
+
+
+ 
+# cd .. 
+
+
+
+# cd kubernetes
+
+
+
+# kubectl delete deployment users-deployment
+
+
+
+# kubectl apply -f=users-deployment.yaml 
+
+
+
+# kubectl get pods
+
+
+
+# kubectl apply -f=users.yaml
+
+
+
+# kubectl get pods
+
+
+
+# kubectl apply -f=users.yaml
+
+
+
+# kubectl get pods
+
+
+
+
+
+
+

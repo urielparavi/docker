@@ -24,6 +24,10 @@ spec:
   accessModes: 
     - ReadWriteMany # Multiple pods can read/write to this volume at the same time
   storageClassName: efs-sc # Bind this PV to the StorageClass named efs-sc
+  # CSI standard allows Kubernetes to work with any cloud storage.
+  # This provisioner (efs.csi.aws.com) dynamically connects to AWS EFS.
+  # All cloud providers use their own CSI drivers (AWS EBS, GCP Filestore, etc.).
+  # Kubernetes uses the CSI protocol to attach storage to pods easily.
   csi: 
     driver: efs.csi.aws.com  # Use the AWS EFS CSI driver
     volumeHandle: fs-0e84a233b6d384a11  # Unique ID for the EFS file system
@@ -61,7 +65,7 @@ kind: Deployment
 metadata:
   name: users-deployment # Name of the Deployment
 spec:
-  replicas: 3 # Run 3 replicas (instances) of the pod
+  replicas: 2 # Run 2 replicas (instances) of the pod
   selector:
     matchLabels:
       app: users # Deployment manages pods with label app=users
