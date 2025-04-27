@@ -3096,11 +3096,11 @@ spec:
 # cd users-api
 
 
-
+# We re-build the image since we added route for the logs
 # docker build -t urielpa/kub-dep-users .
 
 
-
+# We push to Docker Hub
 # docker push urielpa/kub-dep-users
 
 
@@ -3112,11 +3112,11 @@ spec:
 # cd kubernetes
 
 
-
+# We delete since we didn't changed the users-deployment.yaml and we want to latest image
 # kubectl delete deployment users-deployment
 
 
-
+# Re-apply it
 # kubectl apply -f=users-deployment.yaml 
 
 
@@ -3124,7 +3124,8 @@ spec:
 # kubectl get pods
 
 
-
+# We re-apply after we change the replicas to 0 to check that our persistent volume work, so we want to see whether our data
+# still saved
 # kubectl apply -f=users.yaml
 
 
@@ -3132,15 +3133,13 @@ spec:
 # kubectl get pods
 
 
-
+# We re-apply after we change the replicas to 2 to check if our persistent volume work, so if our data still there after
+# that we deleted our pods and yes our data still saved
 # kubectl apply -f=users.yaml
 
 
 
 # kubectl get pods
-
-
-
 
 
 
