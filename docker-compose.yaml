@@ -12,4 +12,11 @@ services:
       - '8080:3000'
     environment:
       MONGODB_CONNECTION_URI: 'mongodb+srv://urielparavi:urielpa30808@cluster0.gqo0gza.mongodb.net/users?retryWrites=true&w=majority'
-      AUTH_API_ADDRESSS: 'auth:3000'
+      AUTH_API_ADDRESS: 'auth:3000'
+  tasks:
+    build: ./tasks-api
+    ports:
+      - '3000:3000'
+    environment:
+      MONGODB_CONNECTION_URI: 'mongodb+srv://urielparavi:urielpa30808@cluster0.gqo0gza.mongodb.net/users?retryWrites=true&w=majority'
+      AUTH_API_ADDRESS: 'auth:3000'

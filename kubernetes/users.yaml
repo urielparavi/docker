@@ -1,92 +1,75 @@
-# Define a StorageClass resource - a dynamic storage type
-apiVersion: storage.k8s.io/v1
 kind: StorageClass
+apiVersion: storage.k8s.io/v1
 metadata:
-  name: efs-sc # Name of the StorageClass
-# provisioner: Defines the engine that will provide the dynamic storage.
-# In this case, we are using the AWS EFS CSI Driver (efs.csi.aws.com).
-# This is a special provisioner that automatically provisions storage
-# based on the Amazon Elastic File System (EFS).
-# When a PersistentVolume is requested in a Kubernetes environment with
-# this StorageClass, Kubernetes will contact Amazon and ask it to provide
-# storage using EFS.
-provisioner: efs.csi.aws.com # Use the AWS EFS CSI driver to provision storage
+  name: efs-sc
+provisioner: efs.csi.aws.com
 ---
-# Define a PersistentVolume (PV) - a piece of storage in the cluster
-apiVersion: v1 
-kind: PersistentVolume 
-metadata: 
-  name: efs-pv # Name of the PersistentVolume
-spec: 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv
+spec:
   capacity: 
-    storage: 5Gi # Size of the storage (5 Gigabytes)
-  volumeMode: Filesystem # Storage will behave like a regular filesystem
-  accessModes: 
-    - ReadWriteMany # Multiple pods can read/write to this volume at the same time
-  storageClassName: efs-sc # Bind this PV to the StorageClass named efs-sc
-  # CSI standard allows Kubernetes to work with any cloud storage.
-  # This provisioner (efs.csi.aws.com) dynamically connects to AWS EFS.
-  # All cloud providers use their own CSI drivers (AWS EBS, GCP Filestore, etc.).
-  # Kubernetes uses the CSI protocol to attach storage to pods easily.
-  csi: 
-    driver: efs.csi.aws.com  # Use the AWS EFS CSI driver
-    volumeHandle: fs-0e84a233b6d384a11  # Unique ID for the EFS file system
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-59d14521
 ---
-# Define a PersistentVolumeClaim (PVC) - a request to use persistent storage
 apiVersion: v1
 kind: PersistentVolumeClaim
-metadata: 
-  name: efs-pvc # Name of the PersistentVolumeClaim
-spec: 
-  accessModes: 
-    - ReadWriteMany # Request access for multiple pods to read/write simultaneously
-  storageClassName: efs-sc # Request storage from the efs-sc StorageClass
-  resources: 
-    requests: 
-      storage: 5Gi  # Request 5 Gigabytes of storage
+metadata:
+  name: efs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 5Gi
 ---
-# Define a Service - expose pods on the network
 apiVersion: v1
 kind: Service
 metadata:
-  name: users-service # Name of the Service
+  name: users-service
 spec:
   selector:
-    app: users # Select pods with label app=users
-  type: LoadBalancer # Create a cloud load balancer and expose it publicly
+    app: users
+  type: LoadBalancer
   ports:
-    - protocol: TCP # Use TCP protocol
-      port: 80 # Expose port 80 to the outside
-      targetPort: 3000 # Forward traffic internally to port 3000 in the pods
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
 ---
-# Define a Deployment - manage replicas of pods
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: users-deployment # Name of the Deployment
+  name: users-deployment
 spec:
-  replicas: 2 # Run 2 replicas (instances) of the pod
+  replicas: 2
   selector:
     matchLabels:
-      app: users # Deployment manages pods with label app=users
+      app: users
   template:
     metadata:
       labels:
-        app: users # New pods created by this deployment will have this label
+        app: users
     spec:
       containers:
-        - name: users-api # Name of the container inside the pod
-          image: urielpa/kub-dep-users:latest # Docker image to run
+        - name: users-api
+          image: urielpa/kub-dep-users:latest
           env:
             - name: MONGODB_CONNECTION_URI
-              value: 'mongodb+srv://urielparavi:urielpa30808@cluster0.gqo0gza.mongodb.net/users?retryWrites=true&w=majority' # MongoDB connection string
-            - name: AUTH_API_ADDRESSS
-              value: 'auth-service.default:3000' # Address of the Auth service
-          volumeMounts: 
-            - name: efs-vol 
-              # Mount the volume inside the container at this path
-              mountPath: /app/users    
-      volumes: 
+              value: 'mongodb+srv://urielparavi:urielpa30808@cluster0.gqo0gza.mongodb.net/users?retryWrites=true&w=majority'
+            - name: AUTH_API_ADDRESS
+              value: 'auth-service.default:3000'
+          volumeMounts:
+            - name: efs-vol
+              mountPath: /app/users
+      volumes:
         - name: efs-vol
           persistentVolumeClaim: 
-            claimName: efs-pvc  # Bind the volume to the PersistentVolumeClaim we created for our pod
+            claimName: efs-pvc

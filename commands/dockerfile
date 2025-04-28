@@ -3143,4 +3143,49 @@ spec:
 
 
 
+258. Challenge Solution
+
+
+
+# cd tasks-api 
+
+
+# We build the image of our tasks
+# docker build -t urielpa/kub-dep-tasks .
+
+
+# Push it to Docker Hub
+# docker push urielpa/kub-dep-tasks
+
+
+
+# *****Sidenote - All these commands doing from CloudShell, so not from our local machine through CLI, but in AWS!*****
+
+
+# We created a new task, so we apply the new deployment and the new service of it
+# kubectl apply -f=tasks.yaml
+
+
+# We deleting the existing deployment first (users-deployment, auth-deployment), since we were created new images for them, so 
+# that the new images are picked up
+# kubectl delete deployment users-deployment
+
+
+# kubectl delete deployment auth-deployment
+
+
+# Re apply them
+# kubectl apply -f=users.yaml -f=auth.yaml
+
+
+
+# kubectl get deployments
+
+
+
+# kubectl get pods
+
+
+
+# kubectl get service
 
