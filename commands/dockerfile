@@ -1,0 +1,3191 @@
+
+# FROM - Allow us to build our image up on another base image. sidenote: we could build a Docker image from scratch,
+# but we always want some kind of operating system layer in there, some kind of other tool which our code needs
+FROM node:12
+
+# WORKDIR: Working directory that tells Docker that all the comands will be executed from inside that folder, so app folder 
+# (in our case)
+WORKDIR /app
+
+# Since all layers changes after the changing layer, we add the package.json here, so when we'll change our source code
+# (when we copy after npm install) only the subsequent instructions we'll re-execute, and then the docker we'll not run
+# npm install when the source code change, since there is no need, because our dependencies not changed
+COPY package.json /app
+
+# RUN - We telling Docker after copying, to run npm install on our image for all the dependencies 
+RUN npm install
+
+# COPY - We tell Docker which files that live here on our local machine, should go into the image, and we specify two path here
+
+# First path: path of the outside container/image where the files leave that should be copied into the image, and a dot 
+# means that is the same folder that contain the Dockerfile. So, it tell Docker that all 
+# folders, sub folders, files should be copie into the image
+
+# Second path: the path inside of the image where those files should be stored. In our case, it's the sub folder app
+# where all our folders/subfolders, files where the Dockerfile, so all of them will copied to /app. And if this folder not
+# exist it will be created
+# COPY . /app
+COPY . .
+
+# Build Time Arguments - With those we can plug if different values into our Dockerfile or into our image when we build
+# that image without having to hard code these values into the Dockerfile, and this arguments can be use only in the 
+# Dockerfile on the instructions, except to the CMD [...], because it's runtime command, so it's executed when the
+# container starts. So we set a dynamic argument which then is set as a default value (DEFAULT_PORT) for the dynamic
+# evironment variable. Important to set this here and not at the beginning, since these instuctions add layers
+# to Dockerfile, so when something changes about them, all susbequent layers are rebuilt and re-executed, and 
+# we don't wanna exeute npm install and all the other instructions again
+
+ARG DEFAULT_PORT=80
+
+# We add the ENV instruction and announce of the environment variable as a PORT with default value of our argument -
+# DEFAULT_PORT. So the DEFAULT_PORT will be available on the entire application, but we still can override this when we 
+# set another environment variable/port when we use commands in creating image/container 
+ENV PORT=$DEFAULT_PORT
+
+# We expose the port from our isolated conatiner to our local machine, but actually this more instruction for 
+# documentation purposes, so we don't need this for run our container
+
+# $PORT - our environment variable - docker recognize it by a dolar sign
+EXPOSE $PORT
+
+# Anonymous Volume
+# The path inside the container which should be mapped to some folder outside of the container and where data
+# should survive if we'll delete the container. In this case it will not survive if the container will delete,
+# because it's anonymous volume (as long as we created the container with --rm command)
+VOLUME [ "/app/feedback" ]
+
+# VOLUME [ "/app/node_modules" ]
+
+# So our node server will run when a container is started based on the image, and not the imaged itself.
+# The difference between RUN and CMD, that RUN will setting up our image, but CMD will activate it on the container based
+# from our image
+# CMD [ "node", "server.js" ]
+
+CMD [ "npm", "start" ]
+
+
+COMMANDS
+
+# docker build . => With the dot we tell Docker that the Dockerfile will be in the same folder as we're running this command
+
+# -d : Run the container in detached mode - i.e. output printed by the container is not visible,
+# the command prompt / terminal does NOT wait for the container to stop
+
+# The -t flag allows us to assign a name to the image, which makes it easier to refer to when running
+
+# CHECKING ERROR/S
+
+# We looking in the output of the container to see what went wrong
+# docker logs feedback-app (feedback-app -containers name)
+
+
+DELETE IMAGES & CONTAINERS - *Sidenote* We can only remove images if we remove their containers first
+
+# docker container prune - Allow us to delete all our stoped containers
+# docker rm - Allow us to delete specific or multiple containers with their names
+
+# docker images - Allow to see all our images
+
+# docker image prune - Allow us to remove all our images which have not tags.
+# docker image prune -a - Allow us to remove all unused images including images with the tags
+# docker rmi - Allow us to remove specific or multiple images with their names
+
+# docker system prune -a => Allow us to clean up unused images, so it's clear everything from the docker system 
+
+# --rm - Create container and remove it automatically when it stop (more details on docker run --help)
+# example: docker run -p 3000:80 -d --rm 05c377af849a
+
+# docker image inspect 05c377af849a - Give us information about the image
+
+
+ENTERING INTERACTIVE MODE 
+
+# In this example we illustrate a case where we only want to run software/app and not run it as a web server - so, we 
+# want to be in attached state, but in listening mode and also to be able input something, so interact with our container
+
+# - i - t / -it => With the combining of the i and the t flags we'll able to be in listening mode, and also to input 
+# something when we run our container. So the container will listen for our input, and we'll also get a terminal exposed 
+# by the container, which is the device where we enter the input (for more details on -i or -t flags, check docker run 
+# --help) docker run -it f5396224a0d1
+
+# If we restarting the container and we want to listen mode and also to be able to input something mode, we'll use -a -i.
+
+# So the difference between the -it/-i -t and the -a -i, is the -it for when we creating/running our container, and -a -i 
+# when we restart our container (for more details on -a or -i flags, check docker start --help)
+# docker start -a -i relaxed_grothendieck
+
+
+# CP COMMAND - allow us to copy files of folders into running container or out of a running container to our local host machine
+
+# Here we copy everything in the dummy folder from our local host machine to this container to test folder (if it not 
+# exist, it will created)
+# docker cp dummy/. youthful_archimedes:/test
+
+# Here we copy from the test folder in our container to the dummy folder in our local host machine 
+# docker cp youthful_archimedes:/test dummy
+
+# Here we copy from the test folder in our container only the test.txt file to the dummy folder in our local host machine 
+# docker cp youthful_archimedes:/test/test.txt dummy
+
+
+NAMING & TAGGING CONTAINERS AND IMAGES
+
+# Here we give a name for container
+# docker run -p 3000:80 -d --rm --name goalsapp 74da73ce6927 (for more details check docker run --help)
+
+# In image, the image tags(name & tag combination) consists of two parts - the actual name (repository), and the tag. 
+# so, name:tag
+# So with the name we set general name, and with the tag we define a more specialized version of that image 
+# For example: node:12
+
+# We build our image and give it name of goals, and tag latest, to indicate that this is latest version of the goalsapp
+# The -t flag allows us to assign a name to the image, which makes it easier to refer to when running
+# docker build -t goals:latest . (for more details check docker build --help) 
+
+# We run and give the container name 'goalsapp' and plug in the image with the tag 'goals:latest' instead the image ID
+# docker run -p 3000:80 -d --rm --name goalsapp goals:latest
+
+PUSHING IMAGES TO DOCKERHUB 
+
+# *Sidenote* - if we push/pull to a private registry (other provider), we need to inlude the host, so the url of the provider
+# for example - HOST:NAME
+
+# We need to verify that this is our account for pushing images to dockerhub. 
+# login (we can also logout after)
+
+# For pushing image to dockerhub we need to create reopository and give our image the name that we set in dockerhub
+# for example: urielpa/node-hello-world:tagname
+
+# First way - create new image with that name
+# docker build -t urielpa/node-hello-world .
+
+# Second way - we reuse that image that we have already and renaming it for retaggin images
+# *Sidenote* when we renaming an image, we create a clone of the old image, so the old image not deleted
+
+# docker tag node-demo:latest urielpa/node-hello-world(:latest)
+# node-demo:latest - old name, urielpa/node-hello-world - new name (we can also allocate it a tag)
+
+# docker push urielpa/node-hello-world(:tagname)
+
+
+PULLING & USING SHARED IMAGES THROUGH DOCKERHUB
+
+# *Sidenote* when we pull, we always pull the latest image of that name from your container registry.
+# So if in the meantime we rebuild the image, and push an updated imaged to the registry,
+# the next time we'll execute docker pull, we'll fetch that latest image,
+# but if we have an image locally because we pulled or run it before, if we'll run a container again based on an image,
+# docker run will not check if the image that we have locally on our system is the latest version of that image.
+# So if the meantime we update the image and pushed it again to dockerhub and we using 'run docker' there after,
+# we'll not get the latest updated image. So we need to manually 'run ducker pull' and then the image name first
+# to ensure that we have the latest image version, and then execute 'docker run again'
+
+# docker pull urielpa/node-hello-world   
+
+EXAMPLES OF CREATEING IMAGES & CONTAINERS (WITH VOLUMES)
+
+# We create image with the name feedback-node
+# docker build -t feedback-node .
+
+# We run container on port 3000 on our local machine in detached mode with containr's name feedback-app based
+# feedback-node image, and after that it will be rmoved
+# docker run -p 3000:80 -d --name feedback-app --rm feedback-node
+
+# docker run -d -p 3000:80 --rm --name feedback-app feedback-node:volumes
+
+
+VOLUMES COMMANDS
+
+# docker volumes ls - give us the list of the volumes   
+
+
+# Volumes - folders on our host machine in the hard drive, which available into the containers, so the data in our 
+# machine it exactly like our data in the folder in the container that we defined. So if the data changes in one place, 
+# it will change in both, and so the information will persist even if the container will deleted, because it will stay 
+# on our machine
+
+# ANONYMOUS VOLUMES VS NAMED VOLUMES
+
+# Anonymous Volume - anonymous volume it attached to specific container. So, if the container will delete, 
+# the volume will not survive, and it will erase
+# example of anonymous volume: VOLUME [ "/app/feedback" ]
+
+# Named volume - volume that can persist from container to a new container even if his previous container deleted
+
+
+CREATING ANONYMOUS VOLUMES & NAMED VOLUMES & DLEETING THEM
+
+# *Sidenote* if we're not adding --rm when we creating our container with anonymous volume, we'll need to delete the  
+# volume and also the container, but if we adding the --rm, it will erase both with the container
+
+# Example to create image with a name and volume as a tag
+# docker build -t feedback-node:volumes .
+
+# *Sidenote* important that when we creating new container and want to connect to volume, that it will be the same name
+# of the volume that we named and created
+
+# Example to create container based imaged with named volume
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback feedback-node:volumes
+
+# Delete specific volume - docker volume rm feedback (feedback - volume name)/e329b312edf7c0e4ddf6bb6a1(volume id)
+
+# Delete all volumes - docker volume prune 
+
+
+BIND MOUNTS
+# *Sidenote* - Bind Mount is not 
+
+# Bind Mounts - It's similar to volume, but the difference that we're managed the path and the folder of our app in our 
+# local machine, and not Docker like with volume that we don't know where it locate. Also the code will not copied from  
+# COPY . . snapshot, but instead from the bind mount, so that folder of our app that we specify for that, and his big 
+# advantage it's that we can persist editable data with him - so code that we changing in live within the container will 
+# save without creating new image or new container, because whenever that the code inside the folder of our app that we 
+# specified will change, it will reflected from it
+
+
+# We setting/creating a Bind Mount
+
+# First way:
+
+# "%cd%" => The absolute path to the folder in our local machine where we are, and where we have all the source code
+#  in our case. and this code would go to the mapped folder, in our case this is the app folder (the working direcotry) 
+# in the container
+
+# "%cd%":/app => Our root/working direcotry in the container where we have all the source code, so the mapped folder,
+# the app folder that we specified as a working directory, because we wanna control the entire app folder, so our code 
+# will change and reflected on our local machine in a live way. So basically we copy our main folder to the main folder 
+# (app) in the container and so if we change code on the local machine, it will also change in the container and so any 
+# change made on the local machine will automatically be visible in the container as well.
+
+# Second way:
+
+# ${PWD} => equal to "%cd%"
+# ${PWD}:/app  => equal to "%cd%":/app 
+
+# Work only from the powershell 
+# docker run -d -p 3000:80 (--rm) --name f-app -v feedback:/app/feedback -v ${PWD}:/app feedback-node:volumes
+# docker run -d -p 3000:80 --name feedback-app -v feedback:/app/feedback -v "%cd%":/app feedback-node:volumes
+
+
+COMBINING & MERGING DIFFERENT VOLUMES - Creating named volume & bind mount & anonymous volume
+
+
+# -v /app/node_modules - anonymous volume because it has no name, and we can create it also like this: 
+# VOLUME [ "/app/node_modules" ], but we'll need to create an new image, so we're not using this way.
+# So, essentially we overwrite our bind mount where we're copied our source code from our local machine 
+# to the root/working directory (app) in the container without the dependencies (because that we have no 
+# dependencies in our local machine) with anonymous volume with longer internal/specific path, with the 
+# source code from the container, so we overwrite it with the return first snapshot where we had the node  
+# modules in the container, when we created the image
+
+# docker run -d -p 3000:80 --name feedback-app -v feedback:/app/feedback -v "%cd%":/app -v /app/node_modules  feedback-node:volumes
+
+
+# ADJUSTMENT FOR NODEMON TO NODEJS
+
+# We needed to add -L in the scripts for nodemon work in windows because we using WSL 2
+# For more details check in: https://github.com/remy/nodemon#application-isnt-restarting
+
+# "scripts": {
+#     "start": "nodemon -L server.js"
+#   },
+
+
+ADDING READ ONLY VOLUMES & OVERWRITING AGAIN WITH ANONYMOUS VOLUME
+
+# The idea here, is that we want to restrict our container to read only, but still keep the permission to write
+# in to feedback and temp folders, because data will go/change there, since all other changes will come from our
+# host machine to the container through the bind mount
+
+# -v "%cd%":/app:ro => ro (read only) - This ensures that from the container docker only will get read permission 
+# and not write.
+
+# -v /app/temp => We specify another anonymous volume that more specific and longer from "%cd%":/app,
+# folder because we wanna overrides the main bind mount volume ("%cd%":/app), and give permission to write in to 
+# the temp folder from the container, since data changing there. So we stick to one that created during the image 
+# building, so the temp folder that already exist in the container. Also because it's anonymous volume, all the 
+# data will erase, but we good with that, since the temp folder was originally intended for temporary files.
+
+# -v feedback:/app/feedback => In the line below we explain about this volume, but we did not added it here,
+# it already exists. We only explain why we didn't need to do anything for give write permission to write in to 
+# the feedback folder.
+# In the case of feedback folder we're already good, since we have already specific and longer volume that overrides
+# our main bind mount volume ("%cd%":/app), the named volume that already exist -v feedback:/app/feedback.
+# So because it more longer it will overrides our bind mount. So we don't need to adding nothing, we're good
+
+# In short, we create container with read only permission, except from to write in to the feedback and the temp 
+# folders, because we do need to get write permissions when we write in to these folders.
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:volumes 
+
+
+
+GENERAL INFORMATION & COMMANDS ON VOLUMES & Managing Docker Volumes
+
+# docker volume --help
+
+# docker volume ls - Lists of all the currently active volumes
+
+# So here we have 3 volumes: -v feedback:/app/feedback, -v /app/temp, -v /app/node_modules, the bind mount is not count, 
+# because is not managed by Docker, but we.
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:volumes 
+
+
+# Example to create a volume independently without also create container. So if we want, we can create a container
+# and then connect to a named volume that exist, so as we used until now, but also to create a new one when we 
+# create a container 
+# docker volume create feedback-files
+
+# docker volume inspect feedback - Give us some informatin about the volume
+
+# We need to remember that if we delete a named volume, all his data also delete. So in our case, if we'll delete the
+# feedback volume, all our records in the feedback folder will delete, and when we'll create new container, it will
+# no longer exist
+# docker volume rm feedback - delete this volume or what that we will specify here
+
+# docker volume prune - delete all the volumes that we have
+
+
+# 59. USING "COPY" VS BIND MOUNTS 
+
+# The reason that we using the COPY snapshot and not just the bind mount (since the bind mount overwritten it anyways),
+# is because we'll use it only during development to reflect changed in our code in the running container instantly.
+# Once we done developing and put the container onto a server, it will run there without commands and without
+# the bind mount. We might use other volumes to ensure that data survives, but will not use this bind mount, because
+# if the container will run in production on a server, there is no connected source code which updates while it's 
+# running. In production we always want to have a snapshot for our code, and that's why we keep the COPY in the
+# Dockerfile, for the production. So we still want to be able to create images with snapshot of our code
+# which we then could use to spin up production ready containers
+
+
+62. WORKING WITH ENVIRONMENT VARIABLES & ".env" FILES
+
+# Environment Variables - help us run one of the same container based on one of the same image in different modes,
+# in different configurations. So to set containers more in a dynamic way when we build an image or when we run container
+
+# We create new image with PORT as the environment variable on the Dockerfile
+# docker build -t feedback-node:env .
+
+# We creating container with the default value of our environment variable PORT that we set on the Dockerfile 
+# that equal to 80. Important that the publish port in the command will be the same as the environment variable,
+# so 80
+
+# docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+# We set port as environment variable in the commads and override our default port value to 8000 when we create container
+# with --env PORT=8000
+
+# docker run -d -p 3000:8000 --env PORT=8000 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+
+# We set port as environment variable as before in the commands, and override our default port value to 8000 when we 
+# create container with slightly different sintax -e PORT=8000. So, --env PORT=8000 equal to --env PORT=8000.
+# We also can set like this multiple environment variable, not just one
+
+# docker run -d -p 3000:8000 -e PORT=8000 --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+# Here we spcify a file that contains our environment variable (if we want), and pointing the location of the file,
+# so ./.env => the same folder as we currently navigated in our terminal, and like this we always use the same command,
+# and switch the value only in the file
+
+# docker run -d -p 3000:8000 --env-file ./.env --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app:ro -v /app/temp -v /app/node_modules feedback-node:env
+
+
+ 64. USING BUILD ARGUMENTS (ARG)
+
+# Build Time Arguments - With those we can plug if different values into our Dockerfile or into our image when we build
+# that image without having to hard code these values into the Dockerfile. In our image we use the 'ARG DEFAULT_PORT=80'
+# as example to build-time-argument
+
+# We build our image with our default value of the DEFAULT_PORT (80)
+# docker build -t feedback-node:web-app .     
+
+# We build our image with new DEFAULT_PORT (8000) that we set when we create the image - so we creating the same image
+# with a new port without to changed the Dockerfile and create new imaged based on that
+# docker build -t feedback-node:dev --build-arg DEFAULT_PORT=8000 . 
+
+
+# SECTION-4
+
+# The Dockerfile of this section for the node app
+
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "app.js"]
+
+
+72. CREATING A CONTAINER & COMMUNICATING TO THE WEB (WWW)
+
+# *Sidenote* - The MongoDB database is not part of the container of node app. The installation of
+# MongoDB is not part of the container. We have no code in the Dockerfile to install MongoDB
+
+# Creating the image for our node app
+# docker build -t favorites-node .     
+
+# Creating container - Here we don't need to create volumes because there is not data that need to survived,
+# we'll connect to another container and it will be our database
+
+# docker run --name favorites -d --rm -p 3000:3000 favorites-node 
+
+
+73. MAKING CONTAINER TO HOST COMMUNICATION WORK
+
+# taken from app.js
+# mongoose.connect(
+# // we replace the localhost with host.docker.internal to connect our container to the local Database in our machine
+#   'mongodb://host.docker.internal:27017/swfavorites',
+#   { useNewUrlParser: true },
+#   (err) => {
+#     if (err) {
+#       console.log(err);
+#     } else {
+#       app.listen(3000);
+#     }
+#   }
+# );
+
+# host.docker.internal - This special domain is rcongnized by Docker and it's translated to the IP address off
+# our machine as seen from inside the Docker container. We also can use it anywhere we need a domain/URL, not
+# just for MongoDB type of request, but also for an HTTP request if we had some web server runnig on our machine
+
+
+74. CONTAINER TO CONTAINER COMMUNICATION: A BASIC SOLUTION
+
+# We using MongoDB image from docker hub, so we don't need to create an image. This will create a new container
+# based this MongoDB image, and this image will spin up a MongoDB database
+
+# -d - for to not block the terminal, because by default it's attached mode 
+# docker run -d --name mongodb mongo
+
+# We alter the host.docker.internal to the IP of the continaer of MongoDB that contain the databse 
+
+# We inspect the MongoDB database container to extract his IP, so we can connect to it from our node container.
+# We looking 'IPAdress' under 'NetworkSettings', and then we connect to it from our node container (check in app.js)
+
+# docker container inspect mongodb
+
+
+
+# After we changed the IP address in app.js to the the IP of the MongoDB database container, we re-build the image,
+# since we changed the code.
+
+# docker build -t favorites-node .  
+
+
+# We run our node container and connect to MongoDB database container
+
+# docker run --name favorites -d --rm -p 3000:3000 favorites-node
+
+
+
+75. INTRODUCING DOCKER NETWORKS: ELEGANT CONTAINER TO CONTAINER COMMUNICATION
+
+
+# network - Within a Docker network, all containers can communicate with each other and IPs are automatically resolved
+
+
+# docker network --help - To see our options/information about the network
+
+# With network unlike volume, Docker will not automatically create them for us when we creating the container.
+# We need to create them on our own, and then we give it a name. In our case it's 'favorites-net'
+# docker network create favorites-net
+
+# We can inspect all existing networks
+# docker network ls
+
+# docker rm NETWORK_NAME/S - Remove one or more networks
+# docker network prune - Remove all unused networks
+
+# We need to add the network communication and his name for to use the network, and then the network will be
+# part of the favorites-net network, and then it will have the ability to communicate with the container/s that we want.
+# docker run -d --name mongodb --network favorites-net mongo
+
+# mongoose.connect(
+#   // mongodb:27017 => The name of MongoDB database container. So if two containers are part of the same network,
+#   // we can just put the other containers name. In our case it's 'mongodb', and we plug it as a domain.
+#   // So the other Docker container's name will be translated by Docker to the IP address of that container,
+#   // and the reson that it will work, it because that both of the containers part of the same network
+#   'mongodb://mongodb:27017/swfavorites',
+#   { useNewUrlParser: true },
+#   (err) => {
+#     if (err) {
+#       console.log(err);
+#     } else {
+#       app.listen(3000);
+#     }
+#   }
+# );
+
+# We build the image again because we changed our code above in app.js
+# docker build -t favorites-node .
+
+# We create the our new favorites container from favorites-node and we connect it to the netowrk and his name.
+# So the same network that we used in MongoDB container, so both of them will be part of the same network
+# docker run --name favorites --network favorites-net -d --rm -p 3000:3000 favorites-node
+
+# We inspected the logs of the favorites container and saw warning which proves that it works, because 
+# it's not connection an error
+# docker logs favorites
+
+# *Sidenote* - When containers communicate/connect with each other, we don't need to publish any port when running
+# that to be connected to container (The MongoDB container). So in our case when we run the MongoDB container, we don't 
+# have the -p option, because -p only required if we plan connecting to something in that container from our local 
+# machine, or from outside the container network. In our case the favorites container communicate with the MongoDB 
+# container, not our local machine, and it will part of the same Docker network. So because we have container to 
+# container connection, we don't need to publish the port, so when we created the container of MongoDB we didn't
+# added the publish port (-p...) like the line below
+# docker run -d --name mongodb --network favorites-net mongo
+
+
+
+81. OUR TARGET APP & SETUP
+
+
+# We create the MongoDB database container from Ducker Hub
+# -p 27017:27017 => Since the backend API in not dockerized and the node API still talks to the database 
+# when it connects - 'mongodb://localhost:27017/course-goals' as if it would be running on our local host machine,
+# for that it work, we exposing our port to 27017 from our MongoDB container to our local machine, so our services can
+# can connect to it trough our local machine, and with that we ensure that our locally running backend which is not
+# dockerized yet, will still be able to talk to it
+# docker run --name mongodb --rm -d -p 27017:27017 mongo 
+
+
+
+83. DOCKERIZING THE NODE APP
+
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 80
+
+CMD [ "node", "app.js" ]
+
+
+# We build the backend image
+# docker build -t goals-node . 
+
+# We run a container based goals-node image
+# docker run --name goals-backend --rm goals-node
+
+# Here we get an error to connect to MongoDB, since we have MongoDB running in acontainer exposing its port, but in our 
+# Dockerized backend application we reaching out to localhost - 'mongodb://localhost:27017/course-goals', and that now
+# inside the container, means that we trying to access some other service on this port inside of that same backend 
+# container, not on our host machine.
+# So we use the special alternative domain or address - 'host.docker.internal' - That's special address/indentifier,
+# which is translated to our real local host machine IP by Docker
+
+# In short, Since we publish the MongoDB container on port 27017 on our local machine for our backend application
+# before we Dockerized it and now we Dockrized the backend application, we cant communicate with our MongoDB container
+# in localhost:27017, because we need to connect with that container on the local machine, since it's public there.
+# So when we need to communicate between container/s and our local machine, we need to use 'host.docker.internal',
+# unless we did inspect the IP of container that we want to connected to or that we use network
+
+# Since we changed our code in the backend, we re-build the image
+# docker build -t goals-node .
+
+# We run this containe again and exposing his ports for the frontend can communicate with our backend container
+# docker run --name goals-backend --rm -d -p 80:80 goals-node
+
+
+
+84. MOVING THE REACT SPA INTO A CONTAINER
+
+# From node => Since the frontend setup depends on Node. it's not Node application, but it uses Node to spin up the
+# development server which serves this React application, and also Node used to optimize the React code which 
+# we write, and to transorm it into code the browser understands 
+FROM node
+
+WORKDIR /app  
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [ "npm", "start" ]
+
+
+# We create our frontend docker image
+# docker build -t goals-react .
+
+# We create/run container based on goals-react image that we just build
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+# Nowadays we don't need to add the "-it" because Docker fixed this problem, so we can ignore this line.
+
+# The problem was that the container is not running anymore without the "-it" flag, because in old versions
+# of Docke we nedded to run it in interactive mode by adding the "-it" option to the Docker run command, so
+# we dont just start the container and be done with it ,but also let the container know that we want to able 
+# to enter commands and interact with it. We don't using the interactive mode here, but React project is set
+# up that if it doesn't receive this input trigger, it will stop the server   
+# docker run --name goals-frontend --rm -d -p 3000:3000 -it goals-react 
+
+# The right line command
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react 
+
+# docker stop goals-frontend goals-backend mongodb  
+
+
+
+85. Adding Docker Networks for Efficient Cross-Container Communication
+
+
+# docker network ls
+
+# We create a network
+# docker network create goals-net 
+
+# We running again the MongoDB container and put it into that network.
+# docker run --name mongodb --rm -d --network goals-net mongo 
+
+# Since we used in mongoose.connect() "host.docker.internal", we need to change it to "mongodb",
+# because the MongoDB container not publishing right now the port 27017 => "-p 27017:27017" like before in our local 
+# machine. So when we're published this port on our local machine, the backend container was connect to it with
+# "host.docker.internal", since our MongoDB container was on our local machine published 27017 port.
+# Now, we need to replace it with "mongodb", because we wanna connect it to the network, so the MongoDB container
+# and the backend container will be able to connect on the network,  So for this we need to rebuild the image again.
+# docker build -t goals-node .
+
+# We run our backend container with the network being used.
+# docker run --name goals-backend --rm -d --network goals-net goals-node
+
+# We build the frontend container and connect to our localhost in our local machine (check in App.js)
+# docker build -t goals-react .
+
+# We create our goals-frontend container based on goal-react image and not using the network, since the part which
+# runs in the container - the development server, doesn't care about the network and it doesn't interact with Node API
+# or the Database, and the part that would interact with the API is not executed in the Docker environment
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react 
+
+# *****We used this way at the end, since with the proxy we got an error*****
+# The previous way we used before adding the "proxy" in package.json
+# Here we run our goals-backend container, and publish it on port 80 on our local host machine, so that our 
+# separate React application is able to talk to that
+# docker run --name goals-backend --rm -d -p 80:80 --network goals-net goals-node
+
+# The new and the right way
+# Here we're not publishing the port 80, since we added the "proxy": "http://goals-backend:80" in package.json.
+# "proxy": This setting is used to specify a backend server that the frontend should communicate, and setting a "proxy" 
+# helps avoid CORS issues by forwarding requests to the backend.
+# This solution is more secure, since only the frontend app (port 3000) is exposed and all backend calls are proxied 
+# inside the container network.
+# docker run --name goals-backend --rm -d --network goals-net goals-node
+
+# docker stop goals-frontend goals-backend mongodb  
+
+
+
+87. Adding Data Persistence to MongoDB with Volumes
+
+
+# The problem with creating MongoDB contgainer like that, that when we start MongoDB container the data not persist
+# docker run --name mongodb --rm -d --network goals-net mongo 
+
+# We adding named volume that will store our data in the container on our local machine
+# /data/db => The place where our database will save in our container - we know this from documentation -
+# https://hub.docker.com/_/mongo. And now our data will survive from container to container
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+
+# For security we adding environment variables for allow access to containers to communicate with our MongoDB container, 
+# only if they have name and password (we nedded to add ?authSource=admin also in the backend for it work) 
+# in mongoose.connect()
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net -e MONGO_INITDB_ROOT_USERNAME=uriel -e MONGO_INITDB_ROOT_PASSWORD=secret mongo
+
+# Since we changed our code in the backend container, we re-build again the image
+# docker build -t goals-node .
+
+# ***We run our application by running all the containers.***
+
+# docker run --name goals-backend --rm -d -p 80:80 --network goals-net goals-node
+
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# We stop them
+# docker stop goals-frontend goals-backend mongodb  
+
+
+
+88. Volumes, Bind Mounts & Polishing for the NodeJS Container
+
+
+# ***We create our container with a bind mount, named volume and anonymous volume***
+
+# -v "%cd%":/app => Bind Moutn - So all our changes in our local machine in our root directory in the backend
+# (since the Dockerfile there) will be reflect in the continaer in the working/root directory (app folder).
+
+# -v logs:/app/logs => Named volume - So the logs in the backend will save from container to container,
+# and since the path of the named volume longer then the path of the bind mount, he will not be affected from
+# our changes in the local machine.
+
+# -v /app/node_modules => Anonymous Volume - So that if we change something in the local machine, the node_modules
+# will taken from the container - so from the snapshot when the image created (and run npm install), and  not from
+# the local machine, since we mabe not have the node_modules there, or that they different/outdated.
+
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -d --rm -p 80:80 --network goals-net goals-node
+
+# Here we added the nodemon in package.json, and We needed to add -L in the scripts for nodemon work in windows
+#  because we using WSL 2
+# "start": "nodemon --legacy-watch app.js"
+# Solution 2: "start": "nodemon -L server.js" 
+
+# Since we changed our code - the package.json and the Dockerfile, we re-build the image again
+# docker build -t goals-node .
+
+# ***We run our applicatin with all the containers***
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -d --rm -p 80:80 --network goals-net goals-node
+
+# For stop them
+# docker stop goals-frontend goals-backend mongodb  
+
+
+# We add environment variables in the Dockerfile:
+
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 80
+
+ENV MONGODB_USERNAME=root
+ENV MONGODB_PASSWORD=secret
+
+
+CMD [ "npm", "start" ]
+
+
+# We access them from our backend - `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@mongodb:27017/course-goals?authSource=admin`,
+
+# Since we changed our code in the Dockerfile and app.js, we re-build the image again
+# docker build -t goals-node .
+
+# ***We run our applicatin with all the containers***
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+# We run the container, and provide our name as environment variable
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -e MONGODB_USERNAME=uriel -d --rm -p 80:80 --network goals-net goals-node
+
+# After that we added the .dockerignore, so when we create the image we'll not add to the image things like -
+# node_modules, git, some private folders etc..
+
+
+
+89. Live Source Code Updates for the React Container (with Bind Mounts)
+
+
+ 
+# We add Bind Mount to bind the src folder in the container to the src folder in our local machine in the frontend,
+# so that whenever we change the code in src folder in our local machine, it will change/reflected on the src folder
+# in the continer
+
+# -e WATCHPACK_POLLING=true - Environment Variable for live relode. We can also add this in package.json, so:
+# change the start script => "start": "WATCHPACK_POLLING=true react-scripts start", and re-build the image.
+
+# ***Sidenote*** - Since we only use the Bind Mount in the src folder in our local machine to src folder in the 
+# container, we don't need to add anonymous volume for to take the node_modules from the container, so from the 
+# first snapshot when we created the image, because the node_modules is not in the src folder, but his brothers
+
+# -it - So we can interaction with the container (we also could exist with ctrl + c in interaction mode) 
+
+# docker run -e WATCHPACK_POLLING=true -v "%cd%"/src:/app/src --name goals-frontend --rm -p 3000:3000 -it goals-react
+
+# docker run --name mongodb -v data:/data/db --rm -d --network goals-net mongo 
+
+# docker run --name goals-backend -v "%cd%":/app -v logs:/app/logs -v /app/node_modules -e MONGODB_USERNAME=uriel -d --rm -p 80:80 --network goals-net goals-node
+
+# docker stop goals-frontend goals-backend mongodb  
+
+# After that we added the .dockerignore, so when we create the image we'll not add to the image things like -
+# node_modules, git, some private folders etc..
+
+
+
+94. Creating a Compose File
+
+# link for details on Compose file versions and upgrading - https://docker-docs.uclv.cu/compose/compose-file/compose-versioning/
+
+
+
+95. Diving into the Compose File Configuration
+
+
+# ***Sidenote*** when we use compose, we don't need to add --rm, because it will deleted automatically
+# and for detached mode we can specify it when we start all services together 
+
+
+
+97. Docker Compose Up & Down
+
+
+# It will start all the services that defined in the compose file, and it will not just start the containers, it
+# also will pull and build all the images that might be required.
+# docker-compose up 
+
+# If we want to start with detached mode, since the default is attached mode
+# docker-compose up -d 
+
+# Stop all the services and remove all containers and the default network it created and so on..
+# docker-compose down 
+
+# For delete volumes. The reason that in deleted when we stop the services, it's because typically we do want
+# to persist data with volumes.
+# docker-compose down -v
+
+
+
+98. Working with Multiple Containers
+
+
+    build: ./backend
+    # Second way:
+    # The longer form to build is that we have an object with nested keys
+    # build: 
+      #***Sidenote about the context*** - It can be the path to our Dockerfile, but it will also be the place where the
+      # the Dockerfile is built thereafter, so where the image will be generated. So our context should be set to a 
+      # folder which includes everything the Dockerfile might be referring to. So if in our Dockerfile we're copying some
+      # folder into the image, the context must be set to a folder that includes that to be copied folder. In this case
+      # this would be the case - the Dockerfile in the backend folder only refers to other folders which are included in
+      # the backend folder. So setting the context to backend would be okay, but if our Dockerfile would be in some other
+      # nested folder and needs access to folders outside of that nested folder, then our context should be set to a
+      # higher level folder. 
+      # context - The path to the folder that holds the Dockerfile
+    #   context: ./backend
+      # dockerfile - dockerfile key which specifies the file name. If our file is named Dockerfile, there is no need to 
+      # use this longer form, but if we named it differently like Dockerfile-dev, then this is how we could tell Docker
+      # Compose which Dockerfile to use
+    #   dockerfile: Dockerfile-dev
+    #   args:
+    #     some-arg: 1
+    ports:
+      # We could specify here multiple ports
+      # The second port is the container internal port, and the first is the port on our local machine where it will be 
+      # exposed.
+      - '80:80'
+    volumes:
+      # Our named volume
+      - logs:/app/logs
+       # Our bind mount volume
+       # With Docker Compose we're allowed to use a relative path - relative from the docker-compose.yaml, not like the 
+       # Docker run that we needed the absolute path
+      - ./backend:/app
+       # Our anonymous volume
+      - /app/node_modules
+    env_file:
+    # The file where our environment variables
+      - ./env/backend.env  
+    # depends_on - When we create and launch multiple services/containers at the same time, sometimes one container
+    # might depend on another container to be up and running already. So for example here, our backend depends on 
+    # mongodb container being up and runing already, because our backend container wants to connect to MongoDB.
+    # So we let compose know  that it should first bring up mongodb and only once that is up and runing, it should 
+    # create this backend container. In our case it only depends on mongodb, but it could be depend on multiple services
+    depends_on: 
+      - mongodb      
+  # frontend:
+
+# For named volumes we should add key next to services, so on the same level as services, and any named volumes we using
+# in our services have to be listed here - in this case 'data', and we simply add this with a colon.
+# *Additional note* - If we use the same volume name in different services, the volume will be shared. So different 
+# containers can use the same volume, the same folder on our hosting machine
+volumes:
+  data:
+  logs:
+
+
+
+   99. Adding Another Container
+
+
+
+    frontend:
+    # If the image already exist it will not re-build the image
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      # Since the node_modules is outside to src folder, we don't need to worry that our node_modules from our local
+      # machine override the node_modules in the container
+      - ./frontend/src:/app/src
+     #  stdin_open - For opening standard input, so we let Docker know that this service needs an open input connection
+    stdin_open: true
+    # tty - TTY flag for attaching the terminal. 
+    # So "-it" flag is just combination of the dash input flag (stdin_open: true) and the TTY flag (tty: true).
+    # And with 2 stdin_open, tty options added, the frontend container
+    # will be started in this interactive mode even if we started in detached mode, it internally still knows that
+    # it's able to receive input and start up correctlly
+    tty: true
+    depends_on:
+      # We make sure that we only starts the frontend if the backend start up 
+      - backend
+
+# For named volumes we should add key next to services, so on the same level as services, and any named volumes we using
+# in our services have to be listed here - in this case 'data', and we simply add this with a colon.
+# *Additional note* - If we use the same volume name in different services, the volume will be shared. So different 
+# containers can use the same volume, the same folder on our hosting machine
+volumes:
+  data:
+  logs:
+
+
+
+    100. Building Images & Understanding Container Names
+
+
+# docker-compose up --help
+
+
+# If we want to reforce it and rebuild images because we know that something changed in the code, and therefore a new 
+# image/s should be built
+# docker-compose up --build
+
+# ****Sidenote*** -  This will only apply to images that we 'build' in docker-compose file, so it will not affect on 
+# images from Docker Hub and so on, only imaged that we used 'build: ./frontend' for example in 'docker-compose file'
+
+# If we want to build any custom images defined in a docker-compose file. So if we just want to build images without
+# starting a container thereafter, we could trigger this by running 'docker-compose file build'
+# docker-compose build
+ 
+
+
+105. Different Ways of Running Commands in Containers
+
+# docker run -p 3000:80 -d --rm --name goalsapp 
+
+# We create/run container
+# -it - For interactive mode, so that it expects some input from us
+# docker run -it node 
+
+
+# We run the container in interactive mode but also in detached mode. That means we can't enter commands like this,
+# but internally this containers still is waiting for input which will keep it up an running
+# docker run -it -d node 
+
+
+# The docker exec command allow us to execute certain commands inside of a running container besides the default
+# command this container executes. So bedides the command that might've been specified in a Dockerfile. That command
+# still continues running, so the application still continues to run, but we can't run additional commands inside of
+# a container. So to use this command we execute a command against that container, and we could try running npm init
+# which creates a node project in that running node container, but 'exec' just like 'run' needs to be started in 
+# interactive mode if we want to stay connected tot that proccess we starting up here and if we want to be able to
+# provie input, and it means that we can run this command without node and npm being installed in our system, because
+# it runs inside of this container, evet that right now it's still not too useful, because it's only in the container,
+# but it's just first demo
+
+# In short words here we are adding a command to the container but it will still run
+# docker exec -it priceless_rosalind npm init
+
+
+# Unlike docker exec that we can execute commands in a running container without interrupting
+# the default coomand which starts when the container starts, we also can override the default command though.
+# Now when we start the node container, the default command that is executed in the container is the node executable 
+# itself, which enters the so called Rapel, which is just an interactive mode where we can run node commands, that's
+# the default command the node will execute when we started, and if we use interactive mode we stay connected and we 
+# can then work with that interactive node input mode. Now we can override this default command by adding a new command
+# after the image name, and here we can specify npm init to overwrite the default command, which be to go into this 
+# ineractive enter some node code mode and instead execute npm init. And because we overrode the default command,
+# the container will finish thereafter and stop the container.
+
+# In short words here override the default command (run -it node), so it will do the command (npm init) and stop ongoing 
+# the connection, so the container will stop
+# docker run -it node npm init 
+
+
+# *Sidenote* - docker exec could be also useful for to read some log files which were written inside of a container
+# without interrupting the main process
+
+
+
+106. Building a First Utility Container
+
+
+# We creating the utility container with extra slim operating system layer, so it will be smaller node image,
+# since right now we only need the package.json
+from node:14-alpine
+
+# We adding the working/root directory and set this to app, to define which folder will be used by commands executed
+# on this container and on this image, and that includes commands we enter with 'docker run'
+WORKDIR /app    
+
+
+# We don't use it because we want that our project more flexible, we don't want to restrict the image to just be able
+# to run the init command, we want to give the user full control over his image
+# CMD npm init
+
+
+# We create this node-util image
+# docker build -t node-util . 
+
+
+# '-it' - We need to do this with interactvie mode (with the open connection input and attaching the termianl) to stay
+# connected and to be able to enter values.
+
+# -v "%cd%":/app - We set this bind mount to mirror it to our local folder, so that what we create in the container
+# is also available in our host machine, so we can create a project on our host machine with help of the container.
+
+# The idea here is to use a utility container to get extra tools for create our project without to install them on our 
+# local machine, since that if it will be php, laravel, python, we won't have it in our local machine, so we want to 
+# use the utility container to get them to our local machine without having to install them on our local machine.
+# So now we even can uninstalled node and NPM on our host machine, and still create projcet with help of NPM init
+# with help of this uitility container
+
+# docker run -it -v "%cd%":/app node-util npm init
+
+
+
+107. Utilizing ENTRYPOINT
+
+# We using the utility image to allow us to run npm commands. So not any commands, but restricted to npm, so for
+# example npm init for initialization, but then npm install for installing
+
+from node:14-alpine
+
+WORKDIR /app  
+
+
+# CMD [ "some command" ]
+
+# ENTRYPOINT - It's similar to the command (CMD) instruction, but it has one key difference. If we add a command
+# after the image name on docker run, for example: 'docker run -it -v "%cd%":/app node-util npm install', then it 
+# wil overwrite the command (CMD) specified in a Dockerfile if there is one. 
+# With ENTRYPOINT that's different - For the entrypoint whatever we enter in docker run, for example:
+# 'docker run -it -v "%cd%":/app node-util npm install', is appended after the entrypoint, so we can specify
+# 'npm' and now we could append any 'npm' command after our image name for example, with npm -
+#  'docker run -it -v "%cd%":/app node-util npm'
+ENTRYPOINT [ "npm" ]
+
+
+
+# docker build -t mynpm .
+
+# So with the entrypoint we just add init, not 'npm', because we have 'npm' already in the entrypoint
+# docker run -it -v "%cd%":/app mynpm init
+
+# So now we can run anny commands with 'npm', for example: '(npm) install', and it will install all the dpendencies
+# to our container and reflect to our local machine with the help of the bind mount, so the node_modules, package.json,
+# package-lock.json will be add to our local machine
+# docker run -it -v "%cd%":/app mynpm install express --save
+
+
+
+108. Using Docker Compose
+
+
+# We copied the image for convenience, we haven't changed it from last time.
+from node:14-alpine
+
+WORKDIR /app  
+
+ENTRYPOINT [ "npm" ]
+
+###############################################
+
+version: '3.8'
+services:
+  # Our container
+  npm:
+    # ./ - Since we're already in the folder in which this Dockerfile can be found
+    build: ./
+    # We add this stardard input open flag and tty flag for attaching the termianl, to ensure theat if the command 
+    # needs our input we can provide our input
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app
+
+############################################### 
+
+# We run our container and create the package.json with init.
+
+# *Sidenote* - The 'npm' its the service name, so the name that we gived in the 'docker-compose.yaml', since that we 
+# already prepend this 'npm' in the Dockerfile. by the way, in this way the container will not remove.
+
+# docker-compose run npm init
+
+# docker-compose exec - To run commands in already running containers which were created by Dockerfile Compose,
+# docker-compose exec
+
+# docker compose run - Allow us to run a single service from 'docker-compose.yaml' file (In case we had multiple
+# services), here we have only one, but if we had multiple services, we could also target a single service by the 
+# service name, so in our case it's 'npm' and then with any command that sould be upended after our entrypoint of
+# our choice, for example init/install like this example.
+
+# --rm - Since with 'docker compose run' there is no up and down. A container starts, does its thing, and once the 
+# command finished it shuts down, but with 'run' it's not removed automatically
+
+# docker-compose run --rm npm init/install
+
+
+114. Adding a Nginx (Web Server) Container
+
+
+
+version: '3.8'
+
+services:
+  # The nginx container
+  server:
+    # We specify nginx image and we use stable-alpine tag version from docker hub, which based on very slim linux 
+    # operating system layer
+    image: 'nginx:stable-alpine'
+    ports:
+      # 80 - The port that the web server exposes to us from the internal container - from documentation:
+      #  https://hub.docker.com/_/nginx 
+      # 8000 - The port that will be exposes on our local machine
+      - '8000:80'
+    volumes:
+      # We bind (mount) the nginx.conf file from our local machine to nginx.conf in the container.
+      # etc/nginx/nginx.conf - We know that it will be in this path specifically from documentation
+      # ro - Read Only, since the container should never change the configuration there 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+
+
+      115. Adding a PHP Container
+
+
+      # We pick slim image with everything we need. 
+# php-fpm - We need this for the Nginx fonfig we're using
+FROM php:7.4-fpm-alpine
+
+# We set our root/working direcotory 
+# '/var/www/html' - This standard folder on web servers to serve our website from. 
+WORKDIR /var/www/html
+
+# We running a command for installing extra dependencies which we need
+# docker-php-ext-install - Tool that help us to install the extra dependencies and we install the pdo and pdo_mysql
+# extensions, and these are our PHP extensions which we need
+RUN docker-php-ext-install pdo pdo_mysql
+
+
+# We don't have a command (CMD) or ENTRYPOINT here, since if we don't have them, then the command (CMD) or ENTRYPOINT 
+# of the base image will be used if it has any, and this php base image will have a default command which is executed
+# which in the end is a command that invokes the PHP interpreter. So this image will automatically run this default
+# command of the base image and therefore it will be able to deal with incoming PHP files that should be interpreted,
+# because our base image is invoking this interpreter
+
+###############################################################
+
+      php:
+    build:
+      # In this build configuratin is not enough to point at the dokcer files folder, because the file in there is not
+      # named just dockerfile, instead we now need more detailed configuration, so we using context to specify the folder
+      # and then we specify the dockerfile
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      # We bind (mount) the src folder in our local machine to html folder in the container.
+      # delegated - It improve our perfomance by that if the container should wrire some data there, it's not instantly
+      # reflected back to the host machine, instead it's proccessed in batches could say, and therefore perfomance is a 
+      # bit better. So it's more for optimization, since in general this container shouldn't write frequently to this
+      # folder (var/www/html) or evet if it does, we don't need to be reflected back to the host machine instantly,
+      # because it won't write anything which we need to access instantly on the host machine
+      # *Sidenote* - ro (read only) is not an option, because it will write some data to our disc
+      - ./src:/var/www/html:delegated
+
+
+
+116. Adding a MySQL Container
+
+
+  mysql: 
+    image: mysql:5.7
+    # Our environment variables used by this mysql image to setup a database, user, password and so on.. So for more
+    # details description check on the docker hub page for this mysql image: https://hub.docker.com/_/mysql
+    env_file:
+      - ./env/mysql.env
+
+# homestead (from mysql.env) - Inital database name of a default initial database which will be created when this
+# container starts up (you can find this in the Laravel documentation)  
+
+
+
+117. Adding a Composer Utility Container
+
+
+FROM composer:latest
+
+WORKDIR /var/www/html
+
+# *Sidenote* - We need custom Dockerfile and not the default imaged, because we want to specify an entrypoint, 
+# and actually we can to it in the docker-compose file as well, but we doing it here in the Dockerfile, since it's more 
+# clear and easy to understand.
+# So the entrypoint is the composer which exists inside of this composer image and container and we install here the Laravel
+# dependencies.
+# "--ignore-platform-reqs" - This ensure that we can run this without any warnings, errors even if some dependencies
+# would be missing 
+ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
+
+
+# ENTRYPOINT - It's similar to the command (CMD) instruction, but it has one key difference. If we add a command
+# after the image name on docker run, for example: 'docker run -it -v "%cd%":/app node-util npm install', then it 
+# wil overwrite the command (CMD) specified in a Dockerfile if there is one. 
+# With ENTRYPOINT that's different - For the entrypoint whatever we enter in docker run, for example:
+# 'docker run -it -v "%cd%":/app node-util npm install', is appended after the entrypoint, so we can specify
+# 'npm' and now we could append any 'npm' command after our image name for example, with npm -
+#  'docker run -it -v "%cd%":/app node-util npm'
+
+#################################################################
+
+composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      # We bind (mount) the directory (html) in the container to our src folder in our local machine, so when we use it to 
+      # install Laravel and set up a Laravel project it does so in our source folder and it should do this in this /var/www/html
+      # internally, so when we create a Laravel apllication in this folder (/var/www/html) inside of the container, this will
+      # then be mirrored back into our source folder on the local host machine
+      - ./src:/var/www/html
+
+
+
+ 118. Creating a Laravel App via the Composer Utility Container
+
+
+  FROM composer:latest
+
+  WORKDIR /var/www/html
+
+  ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
+
+
+############################################################
+
+
+# *Sidenote* - The 'composer' its the service name, so the name that we gived in the 'docker-compose.yaml', since that 
+# we already prepend this 'composer' in the Dockerfile with the ENTRYPOINT. by the way, in this way the 
+# container will not remove by default.
+
+# So we install/set a Laravel project by running the single container (composer) from the docker-compose.yaml, and since
+# We did a bind mount from '/var/www/html' to our 'src' folder on our local machine, the project will reflected from
+# the '/var/www/html' in the container to the 'src' folder on our host machine
+# docker-compose run --rm composer create-project --prefer-dist laravel/laravel .
+
+
+
+120. Launching Only Some Docker Compose Services
+
+# We set the in .env file configuration for Laravel the connction to DB for mysql Database
+
+# homestead - Inital database name of a default initial database which will be created when this
+# container starts up (you can find this in the Laravel documentation)  
+
+# DB_CONNECTION=mysql
+# DB_HOST=mysql
+# DB_PORT=3306
+# DB_DATABASE=homestead
+# DB_USERNAME=homestead
+# DB_PASSWORD=secret
+
+
+###############################################################
+
+# docker-compose --help
+
+# We run all our srvices
+# docker-compose up -d server php mysql
+
+# docker-compose down
+
+# We shortening and target only the server, since we added depends_on: - php, - mysql, so the php and mysql containers
+#  will started automatically when we run the server container
+# docker-compose up -d server
+
+# --build - So if we made a change in one or more in our images, it will rebuild the image/s that changed, but 
+# if nothing has changed, it won't rebuild it. It will just reuse these cached layers
+# docker-compose up -d --build server
+
+
+
+121. Adding More Utility Containers
+
+
+# migrate - One of the artisan command's Laravel suuport, and this will write some data to the database and it will
+# therefore also check whether this database set up works.
+# ***Sidenote*** - The original command in PHP Laravel is: 'php artisan migrate'
+# docker-compose run --rm artisan migrate
+
+# For package.json, install dependencies and so on if we want..
+# docker-compose run --rm npm init/install
+
+
+
+123. Bind Mounts and COPY: When To Use What
+
+
+# docker-compose up -d --build server
+
+# docker-compose run --rm artisan migrate
+
+
+
+128. Getting Started With An Example (of deployment)
+
+
+# We building the image
+# docker build -t node-dep-example .
+
+# We run our container for testing before deployment
+# docker run -d --rm --name node-dep -p 80:80 node-dep-example
+
+
+133. Installing Docker on a Virtual Machine
+
+# sudo - ensures the command is executed as a root user / with sufficient permissions.
+
+# This will simply ensure that all essential packages on that remote machine are updated and are using their latest version.
+# sudo yum update -y
+
+# We install docker on the remote machine on the cloud
+# sudo yum -y install docker
+
+# We start docker there, and thereafter once Docker is started, we're able to run these docker commands like docker
+# run etc..
+# sudo service docker start
+
+
+# The command sudo usermod -a -G docker ec2-user in AWS (or any Linux environment) is used to add the user ec2-user
+# to the docker group.
+# By adding the ec2-user to the docker group, this allows the user to run Docker commands (like docker run, docker ps, etc.)
+# without needing to use sudo each time. It’s a common step to configure users who need access to Docker on an EC2 instance.
+# After running this command, the user would need to log out and log back in for the changes to take effect.
+
+# sudo usermod -a -G docker ec2-user
+
+# We make sure to log out + back in after running these commands.
+# sudo systemctl enable docker
+
+# Thereafter, we can check whether Docker is available by check the version
+# docker version
+
+
+
+135. Pushing our local Image to the Cloud (Docker Hub)
+
+
+# We build our image locally before 
+# docker build -t node-dep-example-1 .
+
+# We rename our image with docker tag command before we push it to Docker Hub, and we give a new tag to this image,
+# so we can run docker tag and then use this image name 'node-dep-example-1', and then use 'urielpa/node-example-1'
+# as a new name that we got from our repository Docker Hub (with without a tagname)
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# We login before to authenticated
+# docker login
+
+# And push our image 
+# docker push urielpa/node-example-1
+
+
+
+136. Running & Publishing the App (on EC2)
+
+# We run our container on the remote machine (aws)
+# docker run -d --rm -p 80:80 urielpa/node-example-1
+
+# docker ps
+
+# security group - This group basically controls which traffic is allowed on our EC2 instance
+
+# Outband rules - Rules controls which traffic is allowed from the instance to somewhere else, and in our case,
+# it's everything and this way 'docker run' worked.
+
+# Inbound rules - Rules controls which traffic is allowed from somewhere in the world to this instance, and in our
+# case by default it was only the port 22 (the SSH port) that was open. But now we needs to allow also HTTP traffic
+# to go into this instance, because we got a running node application there, and this node application is listening
+# on port 80 which is the default HTTP port. So we add new rule and open the default HTTP port (80)
+
+
+
+137. Managing & Updating the Container / Image
+
+# We demonstrate how after we updated our code we push the updated image to our instance on our remote machine in aws.
+
+# So, since we update the code we rebuild the image again
+# docker build -t node-dep-example-1 .
+
+# We tag it appropriately, so rename it to the name that we chosen in Docker Hub (we used the same name from before)
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# We push the updated image to Docker Hub
+# docker push urielpa/node-example-1
+
+# We pull the updated image (the latest version) from Docker Hub to our remote machine in aws
+# docker pull urielpa/node-example-1
+
+# We run our new updated container in our remote machine
+# docker run -d --rm -p 80:80 urielpa/node-example-1
+
+
+
+138. Disadvantages of our Current Approach
+
+# We don't do anything here...
+
+
+
+141. Deploying with AWS ECS: A Managed Docker Container Service
+
+# Instructions to deploy container with ECS
+
+# 1) Create cluster
+
+# 2) Create Task definitions
+
+# 3) Create Services  
+
+# 4) Allow the security group in services on Inbound rules the HTTP 80 to anywhere
+
+
+
+143. Updating Managed Containers
+
+
+# Instructions update container in ECS
+
+
+# So, we update our image first...
+
+# docker build -t node-dep-example-1 .
+
+# We tag it with the same name from before
+# docker tag node-dep-example-1 urielpa/node-example-1
+
+# docker login
+
+# docker push urielpa/node-example-1
+
+
+# The first way:
+
+# 1) on Task definition in our Task, we press on the 'Deoloy' button and choose 'update service'
+
+# 2) Then we mark the 'Force new deployment' and press update at the bottom of the page
+
+
+# The second way: 
+
+# 1) on Task definition in our Task, we press on the 'create new revision' keep all settings and press 'create'
+
+# at the bottom of the page
+
+# 2) Then, on Task definition in our Task press the 'Deoloy' button and choose 'update service' keep all the settings 
+# and press at the button of the page 'update'
+
+
+
+144. Preparing a Multi-Container App
+
+# We build the image after our changes
+# docker build -t goals-node ./backend
+ 
+# We tag it appropriately, so rename it to the name that we chosen in Docker Hub 
+# docker tag goals-node urielpa/goals-node
+
+# We push it to Docker Hub
+# docker push urielpa/goals-node
+
+
+
+145. Configuring the NodeJS Backend Container
+
+# We configured cluster and Task definitions on ECS service with the our image - goals-node
+
+
+
+146. Deploying a Second Container & A Load Balancer
+
+# 1) We created a cluster
+
+# 2) We created a load balancer and added a tag
+
+# 3)  We created a VPC
+
+# 4) We enabled the security group to anyone
+
+# 5) We created a Task definitions with 2 containers - mongodb and backend-goals
+
+# 6) We created a service for them
+
+
+
+147. Using a Load Balancer for a Stable Domain
+
+# *Here we fixed our Load Balancer and the security group*
+
+# Load Balancer - This will ensure that incoming traffic is handled in an efficient way, but it will also help us
+# with assigning a custom domain later if we want to.
+
+# Application Load Balancer - Allow  containers to use dynamic host port mapping (multiple tasks allowed per container
+# instance). Multiple services can use the same listener port on a single load balancer with rule-based routing and paths
+
+
+
+148. Using EFS Volumes with ECS
+
+
+#  *Here we added a volume for that our data will not lost when we remove/update a container*
+
+# 1) We created security group and on inbound rules we add rule with type NFS, port 2049, with our last security group
+
+# 2) We created customized EFS - Elastic File System and added our new security group to it
+
+# 3) We created a volume and mint point on our last Task definition, so we created a new revision added the volume
+# and the mount point for our container mongodb
+
+# 4) We update our service/Force new deployment
+
+
+
+151. Moving to MongoDB Atlas
+
+# *We conected to the mongo db atlas*
+
+# We rebuild the image again because we change the environement variables and runing our container and connect to MongoDB Atlas
+# docker-compose up
+
+# docker-compose down
+
+
+152. Using MongoDB Atlas in Production
+
+# We rebuilded the image since we updated our URL to connect to the MongoDB Atalas 
+# docker build -t urielpa/goals-node ./backend
+
+# docker login
+
+# docker push urielpa/goals-node
+
+
+
+155. Creating a "build-only" Container
+
+# ...
+
+
+
+156. Introducing Multi-Stage Builds
+
+# Multi-Stage builds allow you to have one Dockerfile, that define multiple build steps or setup steps, so called "stages" 
+# inside of that file. Stages can copy results from each other, so we can have one stage to create the optimized files and 
+# another stage to serve them. We can either build the entire Dockerfile going through all stages, step by step from top to 
+# bottom or we select individual stages up to which we wanna build, skipping all stages that would come after them that are 
+# multi-stage builds and multi-stage Dockerfiles.
+
+##########################################################
+
+# Dockerfile:
+
+# The first stage
+# as build - Special instruction could say after every FROM instruction that we could name it any name of our choice,
+# and it will hold the final content of this build stage,  so we can use it in different stage in our Dockerfile
+FROM node:14-alpine as build
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+
+# The second stage
+# We switch to a different base image - nginx, to start our server with the optimized code from the first stage.
+# So, in general we could have many stage, but in our case, our final container from the second stage, will only include 
+# that second stage, but it will first of all build this first stage to derive this final stage 
+# nginx:stable-alpine - Very slim nginx version 
+FROM nginx:stable-alpine
+
+# We use the optimized files from our first stage and serve them to the nginx contianer.
+# "--from" - from some stage in this Dockerfile
+# build - the name of the stage we wanna copy
+# We copy from the build stage - his final content by using "--from=body"
+# /app/build - So we copy from the build stage the build folder that we created with "npm run build" in the app folder in our
+# container, to the "/usr/share/nginx/html" in our nginx image/container
+# "/usr/share/nginx/html" - The default folder from where nginx will serve files, so static content - JS, CSS, HTML.
+# For more details, check on the documentation of nginx: https://hub.docker.com/_/nginx 
+COPY --from=build /app/build /usr/share/nginx/html
+
+# port 80 - the default port that nginx exposes internally, we we expose it here as well 
+EXPOSE 80
+
+# The final command that start our nginx server.
+# "-g", "daemon off;" - from the documentation
+CMD ["nginx", "-g", "daemon off;"]
+
+
+
+157. Building a Multi-Stage Image
+
+# We re-build the image since we change our code and specify the path of the file and place where the image should be build
+# -f - Allow us to specify the Dockerfile name and we should give the full path
+# ./frontend - The place where image we'll build like the "context" in the docker-compose.yaml
+# docker build -f frontend/Dockerfile.prod -t urielpa/goals-react ./frontend
+
+# We pushed it to Docker Hub
+# docker push urielpa/goals-react
+
+
+158. Deploying a Standalone Frontend App
+
+# So the frontend container and the backend container are sperated - each of them will be in different task
+# on port 80 and they communicate with different and unchangeable url/domains
+
+# We created a Load Balancer for the frontend (react) application that could get the incoming requests,
+# since they we'll be in a separate task 
+
+# We created target group for the Load Balancer
+
+# We created a new task for the frontend container
+
+# We created a new service for the frontend (react) application 
+
+
+
+159. Development vs Production: Differences
+
+
+#... 
+
+
+
+160. Understanding Multi-Stage Build Targets
+
+
+# The first stage
+# as build - Special instruction could say after every FROM instruction that we could name it any name of our choice,
+# and it will hold the final content of this build stage,  so we can use it in different stage in our Dockerfile
+FROM node:14-alpine as build
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+
+FROM nginx:stable-alpine
+
+COPY --from=build /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+
+##########################################################
+
+# Here we build the 'build' stage and it will stop after, so it will not build the nginx image. 
+# So if for example we have a Dockerfile with multiple stages and one for testing and the other is for running the
+# server, we can just only run up to the tests, and sometimes we would wanna to only run up to the server.
+# With --target flag we can build stages by their name, so here we target the 'build' stage from our Dockerfile.prod,
+# and this would cause the image build proceess to stop after this stage was processed
+
+# docker build --target build -f frontend/Dockerfile.prod ./frontend
+
+
+
+************************KUBERNETES***********************
+
+
+
+189. A First Deployment - Using the Imperative Approach
+
+# We build the image
+# docker build -t kub-first-app .
+
+# To check commands etc..
+# kubectl help
+
+
+# We created the image on our local machine to demonstrate that in the cluster it will not be available since it's 
+# another machine - docker's virtual machine
+# kubectl create deployment first-app --image=kub-first-app
+
+# So now we have 0 deployments
+# kubectl get deployments
+
+# And 0 pods
+# kubectl get pods
+
+# So we delete our deployment
+# kubectl delete deployment first-app
+
+# Now we created repo on Docker Hub, so we taged it on the name of the repo and the image that we specified on Docker Hub
+# docker tag kub-first-app urielpa/kub-first-app
+
+# We pushed it to Docker Hub
+# docker push urielpa/kub-first-app
+
+# And now we created new deployment object, since the image stored on the Docke Hub, so it will be available on the cluster
+# kubectl create deployment first-app --image=urielpa/kub-first-app
+
+
+# ***Access in to the kubernetes dashboard***
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+
+
+192. Exposing a Deployment with a Service
+
+
+# kubectl create --help
+
+# We exposing our app in the cluster with type of LoadBalancer and in port 8080
+# ClusterIP - The default ip of our pod, but it our app will not be accessible from outside the cluster
+# NodePort - with it we will get unchangeable ip and also it will be accessible from outside wolrd
+# LoadBalancer - with it we will get unchangeable ip and also it will be accessible from outside wolrd, but it would also
+# distribute incoming traffic across all pods which part of this service
+# kubectl expose deployment first-app --type=LoadBalancer --port=8080
+
+# So here we used in NodePort, so we changed it with regular expression to LoadBalancer
+# kubectl patch svc first-app --type=json -p "[{\"op\": \"replace\", \"path\": \"/spec/type\", \"value\": \"LoadBalancer\"}]"
+# service/first-app patched
+
+# Here we exposing our app to the port 8080 in the local machine, so our port of our app in the cluster internally is 8080
+# and also outside in the local machine, so in other words we forwards a port from our local machine to a Kubernetes service
+# inside the cluster. So in this we'll use on existing pod/s
+# kubectl port-forward svc/first-app 8080:8080
+
+
+# The url of our runing app
+# http://localhost:8080, or: http://127.0.0.1:8080
+
+# Here we get all our services
+# kubectl get services
+
+# Here we get our specific service
+# kubectl get service first-app
+
+
+
+193. Restarting Containers
+
+# kubectl get pods
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+# Here we demonstrate that since we have an error on error route which will actually crash the node app, we see that
+# kubernetes will restart this pod again, and in each time that it happening again, it will restart and runing it
+# after longer time from before, to prevent infinite loop in case this container fail all the time
+
+
+
+194. Scaling in Action
+
+# Here we demonstrate that when we get to error route, one pod will crash down, but since we have now 3 pods, 
+# the traffic will distribute on the remain pods that left
+
+# replica is an instance of a pod / container, So here we running that same pod / container that we have 3 times.
+# So since we have the load balancer and we scaled our app to 3 pods, the traffic will not just going to one and
+# the same pod all the time, but it is being distributed across our different pods
+# kubectl scale deployment/first-app --replicas=3
+
+
+# kubectl get pods
+
+# We returned our state to one pod
+# kubectl scale deployment/first-app --replicas=1
+
+
+
+195. Updating Deployments
+
+# We build the image after we changed the code
+# docker build -t urielpa/kub-first-app .
+
+# We check if our deployment still there
+# kubectl get deployments
+
+
+# ***We access to kubernetes dashboard***
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+# We push it to Docker Hub
+# docker push urielpa/kub-first-app
+
+# We demonstrate that if we want to update deployment, we need to change the name of the image on Docker Hub or
+# adding/change/rename the tag of the image, since kubernetes only re-downloade the image with different name,
+# so this updateing will fail
+
+# We tell kubernetes that we want to update image on the deployment object with the name 'first-app', and we want to
+# update the container with the name 'kub-first-app' to the image that we update on Docker Hub 'urielpa/kub-first-app'
+# kubectl set image deployment/first-app kub-first-app=urielpa/kub-first-app
+
+# The url of our app on the local machine
+# http://localhost:8080
+
+# So we build the image again and adding a tag
+# docker build -t urielpa/kub-first-app:2 .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-first-app:2
+
+# We update our image in the deployment with the new tag
+# kubectl set image deployment/first-app kub-first-app=urielpa/kub-first-app:2
+
+# If we want to see if our deployment update, we can check it with 'kubectl rollout status' and the name of the deployment
+# and see if it fail or successfully updated
+# kubectl rollout status deployment/first-app
+
+
+
+196. Deployment Rollbacks & History
+
+# We demonstrate that if we update image that not exist, it will not update our deployment and the container, since
+# this image 'urielpa/kub-first-app:3' not exist on Docker Hub
+# kubectl set image deployment/first-app kub-first-app=urielpa/kub-first-app:3
+
+# We see the status of our deployment object, so the status of our updating and the replicas that should terminate
+# kubectl rollout status deployment/first-app
+
+
+# ***We access to kubernetes dashboard***
+
+# We create the token for sign in to the dashboard
+# kubectl create token dashboard-sa -n kubernetes-dashboard
+
+# This command opens a tunnel from our local machine's localhost:8443 to the Kubernetes Dashboard service's internal 443 
+# port, letting you securely access the Dashboard via https://localhost:8443/
+
+# kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443
+
+# And open it in this URL
+# Open on: https://localhost:8443
+
+
+# We check the status of our pods
+# kubectl get pods
+
+# We undo the updating of that image that doesn't exist
+# kubectl rollout undo deployment/first-app
+
+# We see if our undo succeed, so it does, we'll see in our case 'first-app successfully rolled out'
+# kubectl rollout status deployment/first-app
+
+# We see our revisions, so how versions/stages/snapshot we did to this deployment - 'first-app'
+# kubectl rollout history deployment/first-app
+
+# We go back in time to this snapshot/version, so in this case it's revision 2.
+# kubectl rollout history deployment/first-app --revision=2
+
+# We go back in time to this snapshot/version, so in this case it's revision 1 before we update our code.
+# kubectl rollout history deployment/first-app --revision=1
+
+
+# Service - The job of the service it's to exposes pods to the cluster or externally
+# We delete our service 
+# kubectl delete service first-app
+
+
+# We delete our deployment
+# kubectl delete deployment first-app
+
+# To check if our deployment object deleted
+# kubectl get deployments
+
+
+
+198. Creating a Deployment Configuration File (Declarative Approach)
+
+# We created the deployment.yaml...
+
+
+
+199. Adding Pod and Container Specs 
+
+
+# This is a required field that tells Kubernetes which version of the API to use when we managing the object we defining.
+apiVersion: apps/v1
+# Here we defined a kind key, so the kind of kubernetes object we wanna create and it could be Deployment, Service, Job etc..
+kind: Deployment
+metadata:
+  name: second-app-deployment
+# spec - The specification of the deployment object
+spec:  
+  # replicas - The number of pod instances that we want as a default. So if we expect a lot of traffic we can set it to
+  # more than one pod. So we can have multipule pods we we increase the replicas, but it's always the same pods with
+  # the same containers inside of it. If we want different pods with different containers, we need different deployments
+  replicas: 1
+  # template - Here we defined the pods that should be created as part of this deployment 
+  # Sindenote - template always describes a pod, so it always will be a pod object, and therefore we don't need to 
+  # add Kind: Pod
+  template:
+    # metadata - Since pod is a new object in the Kubernetes world, we need to defined it with metadata
+    metadata:
+      labels:
+        app: second-app
+    # spec - The specification of the Pod object, so how this individual pod/s should configured    
+    spec:
+      containers:
+        - name: second-node
+          image:  urielpa/kub-first-app:2
+          # If we want we can have multipule containers in our pod
+          # - name: ...
+            # image: ...
+              
+
+##############################################################
+
+# apply - Another command built into kube control and it's applies a configuration file to the connected cluster
+# -f - We identify the file with the dash, and we can have multiple files at once and then we give the file name
+# or the path that should be applied 
+# # Sidenote - Here it will not work, because we missing the 'selector' field
+# kubectl apply -f=deployment.yaml
+
+
+
+200. Working with Labels & Selectors
+
+# Here we just added the selector and the lables
+
+
+# This is a required field that tells Kubernetes which version of the API to use when we managing the object we defining.
+apiVersion: apps/v1
+# Here we defined a kind key, so the kind of kubernetes object we wanna create and it could be Deployment, Service, Job etc..
+kind: Deployment
+metadata:
+  name: second-app-deployment
+# spec - The specification of the deployment object
+spec:  
+  # replicas - The number of pod instances that we want as a default. So if we expect a lot of traffic we can set it to
+  # more than one pod. So we can have multipule pods we we increase the replicas, but it's always the same pods with
+  # the same containers inside of it. If we want different pods with different containers, we need different deployments
+  replicas: 1
+  # On the selector key we add a matchLables key or matchExpressions
+  selector:
+    # matchLabels - key value pair of the pod labels we wanna match with this deployment object. So when we add these key value
+    # pair, it sees if there are any pods with these key value that it should control, and it could be even mutiple key values
+    # that specified on one pod 
+    matchLabels:
+      app: second-app
+      tier: backend
+  # template - Here we defined the pods that should be created as part of this deployment 
+  # Sindenote - template always describes a pod, so it always will be a pod object, and therefore we don't need to 
+  # add Kind: Pod
+  template:
+    # metadata - Since pod is a new object in the Kubernetes world, we need to defined it with metadata 
+    metadata:
+      # The labels of our pod - they can be one or more lables, but we need to make sure that they are same lables
+      # (key and the value) that we specified on the selector on the deployment object, and that's how this deployment
+      # will know which pods which are out there runing in the cluster should be controlled by it
+      labels:
+        app: second-app
+        tier: backend
+    # spec - The specification of the Pod object, so how this individual pod/s should configured    
+    spec:
+      containers:
+        - name: second-node
+          image:  urielpa/kub-first-app:2
+          # If we want we can have multipule containers in our pod
+          # - name: ...
+            # image: ...
+              
+
+#############################################################
+
+# We created this deployment
+# kubectl apply -f=deployment.yaml
+
+# We see that deployment up and runing
+# kubectl get deployments
+
+# And we also see this pod un and running
+# kubectl get pods
+
+
+
+201. Creating a Service Declaratively
+
+
+# Service object - Exposes pods to the cluster or externally/outside world. So we don't control deployments with a service
+# but instead pods, but of course pods are typically generated by a deployment
+apiVersion: v1
+# We need to specify the kind of object for kubernetes - Service, Deployment, Job etc. Here we need the Service resource
+kind: Service
+metadata: 
+  # We naming the service 'backend'
+  name: backend
+# spec - The specification/configuration of the service  
+spec: 
+  # selector - Identifies which other resources should be controlled or connected to this service resource.
+  # In this case we wanna define which pods should part of this service
+  # Sidenote - Here we don't need 'mathLabels' since in the service it used older sintax, so the labels are enough, since 
+  # we using really just labels (key value) here.
+  # *Important* - If we have mutiple deployment objects with different labels and we want that our service will control on there
+  # pods, we could specify one label that is identical on both of them. So if we have for example one deployment with a labels 
+  # of 'app: second-app' and 'app: second-frontend' and we have another deployment with lables of 'app: second-app' and 
+  # 'app: second-backend', we can specify only the label which is same in both, so the 'app: second-app', because
+  # is the same on both of the deployments. And like this we use our service to controll multiple pods by sharing the 
+  # unique/same label that exist on the other deployments
+  selector: 
+    # Our label from deployment.yaml, so the label that represent our pod in this deployment
+    app: second-app
+  # The ports which we decided to expose for our pods with our service, so we can expose multiple ports
+  ports:
+    # We using the default protocol 'TCP'
+    - protocol: 'TCP'
+      # The ports we wanna expose on our local machine, so the outside world port on the browser
+      port: 80
+      # targetPort - the port which our app listening on in the container
+      targetPort: 8080
+    # - protocol: 'TCP'
+    # port: 443
+    # targetPort: 443
+  # The type could be ClusterIP, NodePort and the LoadBalancer  
+  type: LoadBalancer
+
+
+  ##########################################################
+
+# We create the service object, so exposing our app to the port that we specified
+# kubectl apply -f service.yaml
+
+# We get our services
+# kubectl get services 
+
+# Short command to get service, so svc is just a short alias for services
+# kubectl get svc
+
+
+
+202. Updating & Deleting Resources
+
+# We apply the configuration after our updating the same way like we created it on the first time
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+# We delete our deployment object (so all the resource that we created by this deployment) by his name
+# kubectl delete second-app-deployment
+
+# We delete all the resource of the dployment ojbect by specify the file
+# kubectl delete -f=deployment.yaml
+
+# We delete all the resource that we created with the dployment ojbect, and service object by specify their files
+# with comma separation
+# kubectl delete -f=deployment.yaml,service.yaml
+
+# We delete all the resource that we created with the dployment ojbect, and service object by specify their name file
+# kubectl delete -f=deployment.yaml -f=service.yaml
+
+
+
+203. Multiple vs Single Config Files
+
+
+apiVersion: v1
+kind: Service
+metadata: 
+  name: backend
+spec: 
+  selector: 
+    app: second-app
+  ports:
+    - protocol: 'TCP'
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
+# --- This is a yaml specific syntax which means a brand new object starts thereafter and it must be 3 dashes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: second-app-deployment
+spec:  
+  replicas: 1
+  selector:
+    matchLabels:
+      app: second-app
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: second-app
+        tier: backend    
+    spec:
+      containers:
+        - name: second-node
+          image:  urielpa/kub-first-app:2
+       
+
+###############################################################
+# We delete the objects on the separate files
+# kubectl delete -f=deployment.yaml -f=service.yaml
+
+# And then demonstrate that our object work fine in the merged config file - master-deployment
+# kubectl apply -f=master-deployment.yaml
+
+# Our URL
+# http://localhost:80
+
+
+
+204. More on Labels & Selectors
+
+
+
+# We delete the master-deployment.yaml
+# kubectl delete -f=master-deployment.yaml
+
+# We re-aplly our deployment object and the service object, creating them from start
+# kubectl apply -f=deployment.yaml -f=service.yaml
+
+
+# We check that we have the deployment
+# kubectl get deployments
+
+# We check that we have the service
+# kubectl get svc
+
+# And now we delete by the -l flag (by label) all the deployments and services which have these labels, so 'group=example'
+# kubectl delete deployments,services -l group=example
+
+# We also can delete object by his name
+# kubectl delete deployment second-app-deployment
+
+
+
+205. Liveness Probes
+
+
+# kubectl apply -f=deployment.yaml -f=service.yaml
+
+
+# kubectl get svc backend
+
+# We see here the restarts of our container with our changes with the LivenessProbe
+# kubectl get pods
+
+
+
+206. A Closer Look at the Configuration Options
+
+# We build the image again without us having to change the tag
+# docker build -t urielpa/kub-first-app:2 .
+
+# Push it to Docker Hub
+# docker push urielpa/kub-first-app:2
+
+# We apply our object
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+
+# kubectl delete -f=deployment.yaml -f=service.yaml
+
+
+
+210. Starting Project & What We Know Already
+
+
+# docker-compose up -d --build
+
+# docker-compose down
+
+# docker-compose up
+
+
+
+213. Creating a New Deployment & Service
+
+
+# kubectl get deployments
+
+
+# docker build -t urielpa/kub-data-demo .
+
+
+# docker push urielpa/kub-data-demo
+
+
+# kubectl apply -f=service.yaml -f=deployment.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get svc story-service
+
+
+
+215. A First Volume: The emptyDir Type
+
+
+# We adding the The emptyDir Type here
+
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: story-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: story
+  template:
+    metadata:
+      labels:
+        app: story
+    spec: 
+      containers:
+        - name: story
+          image: urielpa/kub-data-demo:1
+          # Here we bind the volume into a container
+          volumeMounts: 
+              # Here we define where which volume should be mounted
+              # mountPath - This is the container internal path where this should be mounted, and this depends on our 
+              # application and where it's going to write data. This application is going to wrire data in a story folder,
+              # and it's doing this inside of the project folder of this code file and therefore in the working directory
+              # set up by the image. So app is the working directory in the dockerfile and in there we're accessing a 
+              # story folder where this text.txt file is created, and that's what we also define in the docker-compose file -
+              # so the named volume - stories:/app/story. So in short we tell Kubernetes, which type of volume should be created
+              # here
+            - mountPath: /app/story
+              # We point at the volume name, since we can have multiple volumes for a different containers or also because 
+              # maybe one container once use different volumes and different volumes types for different container internal path
+              name: story-volume
+      # Here we define all the voulume/s that should be part of this pod and all the containers in that pod will be able 
+      # to use that voulme/s       
+      volumes:
+      # Our voulme name
+        - name: story-volume
+          # We set up the volume type/driver, here we use the emptyDir type and we set it to empty object - this means that we
+          # don't have any specific configuration for it, but that we just want to use this type as it is with all its default
+          # settings
+          # emptyDir - Creates a new emapy directory whenever the pod starts and it keeps this directory alive and filled 
+          # with data as long as the pod is alive. Containers can then write to this directory and if containers restart or
+          # are removed the data survives, but if the pod should be removed, this directory is removed, and when the pod
+          # is recreated, a new empty directory is created
+          emptyDir: {}    
+
+  ###############################################################################
+
+# We builded our image since we added the error route
+# docker build -t urielpa/kub-data-demo:1 .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-data-demo:1 
+
+# We apply our deployment object with the new image
+# kubectl apply -f=deployment.yaml
+
+# Here we demonstrate that if we go to the error route the container will crashes but not the pod. The pod will restart it
+# kubectl get pods
+
+
+
+216. A Second Volume: The hostPath Type
+
+# We demonstrate here that with a emptyDir if we have more then one pode, when we'll get error on the error route for
+# example, our data will be lost for some seconds, since the container that containe our data will crashe and we'll
+# redirect to the second pod, the pod that hasn't have our data. So we solve it with hostPath type/driver volume by
+# sharing the path/folder to all the pods that inside of the same machine/worker node, and by that, now if we will 
+# have an error and one container will crush, the other container will have the same data, since we're sharing it
+# to all the pods that inside our machine 
+
+
+# We apply it again with the new hostPath type/driver volume
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+
+
+217. Understanding the CSI Volume Type
+
+
+# We studied theory on  CSI...
+
+
+
+218. From Volumes to Persistent Volumes
+
+
+# We studied theory on volumes
+
+
+
+219. Defining a Persistent Volume
+
+
+
+apiVersion: v1
+kind: PersistentVolume
+metadata: 
+  name: host-pv 
+# Our specification for this persistent volume  
+spec: 
+  # An administrator we control how much capacity can be used by the different pods which are later executed in our cluster
+  # and therfore we can set a capacity for this persistent volume and the pods when they claim this volume later can then
+  # define how much capacity they need. So here we specify the overall available capacity
+  capacity: 
+    # We specify the storage capacity to 1 gigabytes. So we defining that up to 1 gigabytes of space can be claimed and used
+    # here for this hostPath volume
+    storage: 1Gi
+  # volumeMode - There are 2 available modes - filesystem storage and block storage and these are different storage types and 
+  # they are not only defined by Kubernetes but generally. for more details check
+  #  on: https://www.computerweekly.com/feature/Storage-pros-and-cons-Block-vs-file-vs-object-storage
+  # Here we using filesystem storage, because we have a folder on the file system inside of our virtual machine
+  volumeMode: Filesystem
+  # We set here how our volume can access.
+  # We specify what will be allow when we claim this persisten volume and we can specify all modes, because it's only
+  # when we claim a volume that we then have to define how we want to claim this volume for a given pod. Here we just
+  # define what should generally be allowed, so how this may be claimed.
+  accessModes:
+    # Sidenote - we used 'ReadWriteOnce' since the 'ReadOnlyMany' and 'ReadWriteMany' are not option, since we're using 
+    # the hostPast type (becasue we're on one single node since we're on develop mode). So they will not in available option
+    # because hostPath by definition is defined on one node, and therefore another node and another pode running on another
+    # node won't be able to claim it
+    # ReadWriteOnce - Means that this volume can be mounted as a read-write volume by a single (worker) node. So by multiple
+    # pods, by they all have to be on the same node
+    - ReadWriteOnce
+    # ReadOnlyMany - Means that it's read-only, but it can be claimed by multiple nodes. So multiple pods on different nodes
+    # can claim the same persisten volume 
+    # - ReadOnlyMany  
+    # ReadWriteMany - It's like 'ReanOnlyMany', just with write access
+    # - ReadWriteMany  
+# Sidenote about the host path type/driver in this persisten volume - It will only work on a single node testing environment,
+# but this is the environment we have right now, since we are in delvelopment mode, so we on one worker node, but of course 
+# when we will be on production, we'll not use the hostPath type/driver, because our pods will be maby on different worker
+# node/machine.  
+  # So we set up a hostPath persistent volume as a standalone volume detached from any pod in this environment  
+  hostPath: 
+    path: /data 
+    type: DirectoryOrCreate 
+
+####################################################################
+
+ 220. Creating a Persistent Volume Claim
+
+
+
+# PVC (PersistentVolumeClaim):
+# - Defined by the developer/application.
+# - Requests storage with specific requirements (size, access mode).
+# - Kubernetes finds a suitable PV or provisions one dynamically.
+# - Acts as a bridge between the Pod and the storage.
+# - Mounted to the Pod via the deployment configuration.
+# Summary - In order to use the persitent volume we need to create a claim and that claim then need to be made by the pods
+# that want to use this volume. Therefore we gotta to two things: we first of all have to configure this claim here, and then
+# we have to use it it on all the pods that do wanna use it.
+apiVersion: v1 
+kind: PersistentVolumeClaim 
+metadata: 
+  name: host-pvc 
+# The specification/configuration for this claim  
+spec: 
+  # We specify which persistent volume we wanna claim. Here we have one, but we could multiple persistent volumes which also
+  # could use different types if we needed it
+  # Sidenote - We cannot just claim by name, there are other of claiming by resource, so that we don't claim one specific 
+  # persisten volume (it called "Dynamic Volume Persistent"), but if we had different volumes we could just say I want a 
+  # volume with that much space, this configuration etc..
+  volumeName: host-pv 
+  # We define the modes which we wanna use here for this claiming this (host-pv) volume, and we could also have multiple list
+  # modes here, but we want to claim by the only supported way which is the ReadWriteOnce access, because we're on single node,
+  # but if we would use this claim on different pods and some pods only need read access and other need read-write access,
+  # we could specify it here, we just need to allow it on our persistent volume host-pv 
+  accessModes: 
+    - ReadWriteOnce 
+  # resources - The counterpart to the capacify in host-pv and we can specify which resource we wanna get for this claim 
+  # and the resource object have a requests key nested below it and then can request storage 
+  resources: 
+    requests:
+      # So since we have a storage of one gigabyte as a capacity in the persistent volume host-pv, that's also the maximum we
+      # can request here, but we could also request less for this claim. So if we had multiple claims to the same persisten
+      # volume, we might wanna request less, so that in total we don't request more then we got available
+      storage: 1Gi
+
+
+      # ***************This we added on the deployment.yaml look the file*********************
+         # By the persistentVolumeClaim we connect our pod to our claim (host-pvc) so that ultimately it reaches out to the
+          # persistent volume host-pv and gets its volume 
+          # Sidenote - We can also use this claim in different pods, so we can use one of the same claim in different types
+          # of pods
+          persistentVolumeClaim:
+            # We specify the claim name, because we might have multiple claims
+            claimName: host-pvc
+
+
+
+221. Using a Claim in a Pod
+
+# ***Since we added the storage class, we re-apply it***
+
+# We get the sc - storage classes
+# kubectl get sc
+
+
+# kubectl apply -f=host-pv.yaml
+
+
+# kubectl apply -f=host-pvc.yaml
+
+
+# kubectl apply -f=deployment.yaml
+
+# We get the persistent volumes
+# kubectl get pv
+
+# We get our claims
+# kubectl get pvc
+
+
+# kubectl get deployments
+
+
+
+223. Using Environment Variables
+
+# We changed our story folder in app.js to environment variable and used it on the deployment.yaml
+
+
+# docker build -t urielpa/kub-data-demo:2 . 
+
+
+# docker push urielpa/kub-data-demo:2
+
+
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get pods
+
+
+
+224. Environment Variables & ConfigMaps
+
+# We apply our ConfigMap object - our environment variables file
+# kubectl apply -f=environment.yaml
+
+
+# We can see here all the ConfigMaps we have
+# kubectl get configmap
+
+# We applyed again the deployment.yaml since we added the reference of the ConfigMap in our file
+# kubectl apply -f=deployment.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+
+228. Starting Project & Our Goal
+
+
+# docker-compose up -d --build
+
+
+# docker-compose down
+
+
+
+229. Creating a First Deployment
+
+
+# kubectl get deployments
+
+
+# kubectl get services
+
+
+# cd users-api
+
+
+# docker build -t urielpa/kub-demo-users .
+
+
+# docker push urielpa/kub-demo-users
+
+
+# kubectl apply -f=users-deployment.yaml
+
+
+# cd ..
+
+# cd kubernetes
+
+
+# kubectl get pods
+
+
+
+230. Another Look at Services
+
+
+# kubectl apply -f=users-service.yaml
+
+
+# kubectl get svc users-service
+
+
+
+
+# --- Kubernetes Service Types Summary ---
+
+# ClusterIP: Default type. Internal communication only. Accessible only within the cluster.
+# DNS available: my-service.namespace.svc.cluster.local
+
+# NodePort: Exposes service on a static port (30000-32767) on each Node IP. External access allowed.
+# No stable domain – use <Node-IP>:<NodePort>
+
+# LoadBalancer: Exposes service via external cloud load balancer (AWS/GCP/Azure).
+# Provides stable public IP or domain (e.g. from AWS ELB)
+
+# ClusterIP = internal use 🔒
+# NodePort = quick external access 🚪
+# LoadBalancer = production-grade exposure 🌍
+
+
+
+231. Multiple Containers in One Pod
+
+
+# docker build -t urielpa/kub-demo-auth .
+
+
+# docker push urielpa/kub-demo-auth
+
+
+# docker build -t kub-demo-users .
+
+
+# docker push urielpa/kub-demo-users
+
+
+
+232. Pod-internal Communication
+
+
+# kubectl apply -f=users-deployment.yaml
+
+
+# kubectl get pods
+
+
+
+233. Creating Multiple Deployments
+
+
+# Here we created a service and deployment objects for the auth pod 
+
+
+
+234. Pod-to-Pod Communication with IP Addresses & Environment Variables
+
+# We applied the service, deployment object since we didn't apply them
+# kubectl apply -f=auth-service.yaml -f=auth-deployment.yaml
+
+# We get all the services that exist
+# kubectl get svc
+
+# We re-apply the users-deployment since we added the service IP of the auth, so the IP of the auth-service 
+# kubectl apply -f=users-deployment.yaml
+
+
+# kubectl get pods
+
+
+# kubectl get deployments
+
+# We re-build the image again since we added in users-app.js the auto-generated environment variable - 
+# AUTH_SERVICE_SERVICE_HOST
+# docker build -t urielpa/kub-demo-users .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-users
+
+# We apply the users-deployment again
+# kubectl apply -f=users-deployment.yaml
+
+# We delete the users-deployment to make sure that our change will be taken into account, because otherwise this deployment
+# wouldn't do anything, because the file didn't change and then Kubernetes will not re-pull the image. For that we
+# would have to use a different tag which we change all the time
+# kubectl delete -f=users-deployment.yaml
+
+# Re apply it
+# kubectl apply -f=users-deployment.yaml
+
+
+# kubectl get pods
+
+
+
+235. Using DNS for Pod-to-Pod Communication
+
+
+# kubectl get svc
+
+###############################
+
+# A Namespace is a way to logically divide a Kubernetes cluster.
+# It is commonly used to separate:
+# - Environments like: dev (development), staging (pre-production), and production (live)
+# - Teams working on the same cluster (e.g., frontend-team, backend-team)
+# - Customers or projects in multi-tenant systems (e.g., customer-a, customer-b)
+#
+# Namespaces provide resource isolation and let you use the same resource names
+# in different contexts without conflicts. Each namespace can have its own
+# pods, deployments, services, config maps, secrets, and permissions (RBAC).
+
+#######################################
+
+# We get our namespace for the DNS
+# kubectl get namespaces
+
+# We apply it again afer adding the DNS to our service
+# kubectl apply -f=users-deployment.yaml
+
+
+
+238. Challenge Solution
+
+# We're entering the folder tasks-api since our project there and we need to build the image after adding
+# environment variable in task-app.js (AUTH_ADDRESS)
+# cd tasks-api
+
+# We build the image
+# docker build -t urielpa/kub-demo-tasks .
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-tasks
+
+# We going to Kubernetes folder and apply our files there because they are there
+# cd .. 
+
+# cd kubernetes
+
+# kubectl apply -f=tasks-service.yaml -f=tasks-deployment.yaml
+
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+# kubectl apply -f=tasks-deployment.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+# kubectl get svc
+
+
+# The task's url
+# http://localhost:8000/tasks, localhost:8000/tasks
+
+
+
+239. Adding a Containerized Frontend
+
+
+# cd frontend
+
+# We build our image for the frontend that we added now
+# docker build -t urielpa/kub-demo-frontend .
+
+
+# We run our frontend container
+# docker run -p 80:80 --rm -d urielpa/kub-demo-frontend
+
+
+# Our frontend URL: http://localhost/
+
+
+# cd ..
+
+
+# cd tasks-api
+
+
+# We re-build thas tasks image since we added the middleware for CORS 
+# docker build -t urielpa/kub-demo-tasks .
+
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-tasks 
+
+
+# cd ..
+
+
+# cd kubernetes
+
+
+# We delete our tasks-deployment even that we not changed it, because our image changed and we want that Kubernetes will
+# take the latest snapshot for this image 
+# kubectl delete -f=tasks-deployment.yaml
+
+
+# We re-apply it
+# kubectl apply -f=tasks-deployment.yaml
+
+
+# kubectl get pods
+
+# Run our container
+# docker run -p 80:80 --rm -d urielpa/kub-demo-frontend
+
+
+
+240. Deploying the Frontend with Kubernetes
+
+
+
+# We build the image before, so now we just push it to Docker Hub
+# docker push urielpa/kub-demo-frontend
+
+
+# cd kubernetes
+
+
+# We apply our new frontend service, frontend deployment objects
+# kubectl apply -f=frontend-service.yaml -f=frontend-deployment.yaml
+
+
+# kubectl get pods
+
+
+# kubectl get svc
+
+
+# Our URL that we expose for the frontend on the browser
+# Our frontend URL: http://localhost:80
+
+
+
+241. Using a Reverse Proxy for the Frontend
+
+
+# Reverse Proxy - Explanation
+# A Reverse Proxy is a server that forwards client requests to internal or other servers.
+# It works in contrast to a Forward Proxy, which forwards client requests to external resources.
+# Main uses:
+# 1. Forwarding requests to internal servers - routes requests based on the path (e.g., /api/ forwards to an API server).
+# 2. Load Balancing - distributes incoming traffic across multiple internal servers to prevent overload on a single server.
+# 3. Security - hides the internal servers from direct client access, acting as a barrier.
+# 4. Caching - stores request results to improve performance for subsequent requests.
+# 5. SSL Termination - handles HTTPS encryption without burdening internal servers.
+# 6. Performance Tuning - serves static content like images, CSS, JS, or forwards requests based on specific criteria.
+#
+# Example Configuration:
+# Forwarding API requests to an internal server (another service in Kubernetes)
+# Serving static files through Nginx
+
+#####################################################
+
+# cd frontend
+
+
+# We build our image after we changed our URL fetch('/api/tasks'....) to our Nginx that redirect these requests
+# to their backend, in our case it the task backend
+# docker build -t urielpa/kub-demo-frontend .
+
+
+# We push it to Docker Hub
+# docker push urielpa/kub-demo-frontend
+
+
+
+# cd ..
+
+
+# cd kubernetes
+
+
+# We delete since we're update our image but our file doesn't changed, so we want that it take the last update image
+# kubectl delete -f=frontend-deployment.yaml
+
+
+# We re-appied it
+# kubectl apply -f=frontend-deployment.yaml
+
+
+
+# kubectl get pods
+
+
+
+# cd ..
+
+
+
+# cd frontend
+
+
+# We re-build our image after we changed our DNS in our Nginx config
+# docker build -t urielpa/kub-demo-frontend .
+
+
+# We push to Docker Hub
+# docker push urielpa/kub-demo-frontend
+
+
+
+# cd .. 
+
+
+
+# cd kubernetes
+
+
+# We delete since we're update our image but our file doesn't changed, so we want that it take the last update image
+# kubectl delete -f=frontend-deployment.yaml
+
+
+# We re-appied it
+# kubectl apply -f=frontend-deployment.yaml
+
+
+
+# Our URL
+# http://localhost/ or localhost
+
+
+
+247. Preparing the Starting Project
+
+
+# docker build -t urielpa/kub-dep-users .
+
+
+
+# docker push urielpa/kub-dep-users 
+
+
+
+# docker build -t urielpa/kub-dep-auth .
+
+
+
+# docker push urielpa/kub-dep-auth 
+
+
+
+252. Applying Our Kubernetes Config
+
+# Here we upload these files to AWS in the CloudShell - Select Actions and upload file and then run it in the CloudShell,
+# since from now our cluster is the cluster that on AWS and not the dummy cluster for the development from Docker in our
+# virtual machine, so all these commands we run on CloudShell in AWS
+
+# kubectl apply -f=auth.yaml -f=users.yaml
+
+
+# kubectl get deployments
+
+
+# kubectl get pods
+
+
+# kubectl get svc
+
+
+# kubectl get namespaces
+
+
+
+255. Creating a Persistent Volume for EFS
+
+
+# We get our storage class (we run it on the CloudShell of AWS and not through the CLI from our local machine)
+# kubectl get sc
+
+
+
+# Here we added the persistent volume/claim, the storageClass, and we edited the deployment ojbect and we added the
+# the volume and the persistentVolumeClaim etc..
+
+##########################################################################
+
+
+# Define a StorageClass resource - a dynamic storage type
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc # Name of the StorageClass
+# provisioner: Defines the engine that will provide the dynamic storage.
+# In this case, we are using the AWS EFS CSI Driver (efs.csi.aws.com).
+# This is a special provisioner that automatically provisions storage
+# based on the Amazon Elastic File System (EFS).
+# When a PersistentVolume is requested in a Kubernetes environment with
+# this StorageClass, Kubernetes will contact Amazon and ask it to provide
+# storage using EFS.
+provisioner: efs.csi.aws.com # Use the AWS EFS CSI driver to provision storage
+---
+# Define a PersistentVolume (PV) - a piece of storage in the cluster
+apiVersion: v1 
+kind: PersistentVolume 
+metadata: 
+  name: efs-pv # Name of the PersistentVolume
+spec: 
+  capacity: 
+    storage: 5Gi # Size of the storage (5 Gigabytes)
+  volumeMode: Filesystem # Storage will behave like a regular filesystem
+  accessModes: 
+    - ReadWriteMany # Multiple pods can read/write to this volume at the same time
+  storageClassName: efs-sc # Bind this PV to the StorageClass named efs-sc
+  csi: 
+    driver: efs.csi.aws.com  # Use the AWS EFS CSI driver
+    volumeHandle: fs-0e84a233b6d384a11  # Unique ID for the EFS file system
+---
+# Define a PersistentVolumeClaim (PVC) - a request to use persistent storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: 
+  name: efs-pvc # Name of the PersistentVolumeClaim
+spec: 
+  accessModes: 
+    - ReadWriteMany # Request access for multiple pods to read/write simultaneously
+  storageClassName: efs-sc # Request storage from the efs-sc StorageClass
+  resources: 
+    requests: 
+      storage: 5Gi  # Request 5 Gigabytes of storage
+---
+# Define a Service - expose pods on the network
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service # Name of the Service
+spec:
+  selector:
+    app: users # Select pods with label app=users
+  type: LoadBalancer # Create a cloud load balancer and expose it publicly
+  ports:
+    - protocol: TCP # Use TCP protocol
+      port: 80 # Expose port 80 to the outside
+      targetPort: 3000 # Forward traffic internally to port 3000 in the pods
+---
+# Define a Deployment - manage replicas of pods
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment # Name of the Deployment
+spec:
+  replicas: 3 # Run 3 replicas (instances) of the pod
+  selector:
+    matchLabels:
+      app: users # Deployment manages pods with label app=users
+  template:
+    metadata:
+      labels:
+        app: users # New pods created by this deployment will have this label
+    spec:
+      containers:
+        - name: users-api # Name of the container inside the pod
+          image: urielpa/kub-dep-users:latest # Docker image to run
+          env:
+            - name: MONGODB_CONNECTION_URI
+              value: 'mongodb+srv://urielparavi:urielpa30808@cluster0.gqo0gza.mongodb.net/users?retryWrites=true&w=majority' # MongoDB connection string
+            - name: AUTH_API_ADDRESSS
+              value: 'auth-service.default:3000' # Address of the Auth service
+          volumeMounts: 
+            - name: efs-vol 
+              # Mount the volume inside the container at this path
+              mountPath: /app/users    
+      volumes: 
+        - name: efs-vol
+          persistentVolumeClaim: 
+            claimName: efs-pvc  # Bind the volume to the PersistentVolumeClaim we created for our pod
+
+
+
+
+  ###########################################################################
+
+
+
+  256. Using the EFS Volume
+
+# Sidenote - CSI (Container Storage Interface) is the method or standard through which Kubernetes connects to external storage — in your case, to AWS EFS, so it's a drive. In kubernetes it's part of volumes, but it's not volume like emptiDir or 
+# hostPath, but it's just the Gateway, so the driver between Kubernetes and our  storage provider - the EFS in AWS
+
+# CSI (Container Storage Interface) is a standard that defines how storage drivers integrate with Kubernetes.
+# It allows Kubernetes to work with any storage provider (AWS, GCP, Azure, etc.) through a unified interface.
+
+# provisioner: Here we are using the AWS EFS CSI Driver (efs.csi.aws.com).
+# This driver knows how to connect to Amazon EFS and dynamically provision storage volumes for our pods.
+
+# Each major cloud provider creates its own CSI driver (e.g., EBS for AWS, Filestore for GCP),
+# and Kubernetes communicates with them using the same standardized CSI protocol.
+
+# In short: This allows external storage to be easily, intelligently, and dynamically attached to pods without manual 
+# configuration.
+
+
+
+# cd users-api
+
+
+# We re-build the image since we added route for the logs
+# docker build -t urielpa/kub-dep-users .
+
+
+# We push to Docker Hub
+# docker push urielpa/kub-dep-users
+
+
+ 
+# cd .. 
+
+
+
+# cd kubernetes
+
+
+# We delete since we didn't changed the users-deployment.yaml and we want to latest image
+# kubectl delete deployment users-deployment
+
+
+# Re-apply it
+# kubectl apply -f=users-deployment.yaml 
+
+
+
+# kubectl get pods
+
+
+# We re-apply after we change the replicas to 0 to check that our persistent volume work, so we want to see whether our data
+# still saved
+# kubectl apply -f=users.yaml
+
+
+
+# kubectl get pods
+
+
+# We re-apply after we change the replicas to 2 to check if our persistent volume work, so if our data still there after
+# that we deleted our pods and yes our data still saved
+# kubectl apply -f=users.yaml
+
+
+
+# kubectl get pods
+
+
+
+258. Challenge Solution
+
+
+
+# cd tasks-api 
+
+
+# We build the image of our tasks
+# docker build -t urielpa/kub-dep-tasks .
+
+
+# Push it to Docker Hub
+# docker push urielpa/kub-dep-tasks
+
+
+
+# *****Sidenote - All these commands doing from CloudShell, so not from our local machine through CLI, but in AWS!*****
+
+
+# We created a new task, so we apply the new deployment and the new service of it
+# kubectl apply -f=tasks.yaml
+
+
+# We deleting the existing deployment first (users-deployment, auth-deployment), since we were created new images for them, so 
+# that the new images are picked up
+# kubectl delete deployment users-deployment
+
+
+# kubectl delete deployment auth-deployment
+
+
+# Re apply them
+# kubectl apply -f=users.yaml -f=auth.yaml
+
+
+
+# kubectl get deployments
+
+
+
+# kubectl get pods
+
+
+
+# kubectl get service
+
